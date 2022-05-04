@@ -1,32 +1,13 @@
+import EmergencyState.*;
 import ErrorHandling.*;
 
-/** 
- * The main class to be used to control the robot and make it sort.
- * @author Peter de Bruijne
- * @author Tjeerd Roks
- */
 public class Main {
        
-    public void LEDBlink() {
-        try {
-            Runtime runTime = Runtime.getRuntime();
-            runTime.exec("gpio mode 4 out");
-            while(true) {
-                runTime.exec("gpio write 4 1");
-                Thread.sleep(500);
-                runTime.exec("gpio write 4 0");
-                Thread.sleep(500);
-            }
-        } catch (Exception e) {
-            System.out.println("Exception occured: " + e.getMessage());
-        }
-    }
-
     public static void main(String[] args) {
         // Just a blinking led effect
         System.out.println("Press CTRL-C to exit");
-        Main method = new Main();
-        method.LEDBlink();
+        LEDBlink ledBlink = new LEDBlink(4, 500);
+        ledBlink.Blink();
     }
 
 }
