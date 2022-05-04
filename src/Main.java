@@ -1,6 +1,6 @@
 public class Main {
        
-    public static void main(String args) {
+    public static void main(String[] args) {
         // Just a blinking led effect
         System.out.println("Press CTRL-C to exit");
 
