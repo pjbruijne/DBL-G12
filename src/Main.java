@@ -1,9 +1,6 @@
 public class Main {
        
-    public static void main(String[] args) {
-        // Just a blinking led effect
-        System.out.println("Press CTRL-C to exit");
-
+    public void LEDBlink() {
         try {
             Runtime runTime = Runtime.getRuntime();
             runTime.exec("gpio mode 4 out");
@@ -16,6 +13,13 @@ public class Main {
         } catch (Exception e) {
             System.out.println("Exception occured: " + e.getMessage());
         }
+    }
+
+    public static void main(String[] args) {
+        // Just a blinking led effect
+        System.out.println("Press CTRL-C to exit");
+        Main method = new Main();
+        method.LEDBlink();
     }
 
 }
