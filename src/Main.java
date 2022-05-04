@@ -1,3 +1,10 @@
+import ErrorHandling.*;
+
+/** 
+ * The main class to be used to control the robot and make it sort.
+ * @author Peter de Bruijne
+ * @author Tjeerd Roks
+ */
 public class Main {
        
     public void LEDBlink() {
