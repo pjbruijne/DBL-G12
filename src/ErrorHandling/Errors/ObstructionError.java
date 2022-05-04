@@ -1,4 +1,4 @@
-package Errors;
+package ErrorHandling.Errors;
 
 public class ObstructionError extends Error {
 	public ObstructionError() {
