@@ -1,10 +1,10 @@
 package EmergencyState;
 
-public class LEDBlink {
+public class LEDBlink implements Runnable {
 
     private int pinNumber; // WiringPin diagram
     private int blinkSpeed; // in miliseconds
-    private boolean toggle = false; // to turn blinking on and off
+    private volatile boolean running = true; // to turn blinking on and off
 
     // Constructor
     public LEDBlink(int pinNumber, int blinkSpeed) {
@@ -12,13 +12,12 @@ public class LEDBlink {
         this.blinkSpeed = blinkSpeed;
     }
 
-    public void blink() {
+    public void run() {
         try {
            Runtime runTime = Runtime.getRuntime();
-           toggle = true;
            // Set the pin to receiving
             runTime.exec("gpio mode " + pinNumber + " out");
-           while(toggle) {
+           while(running) {
                // Set the pin to high and wait
                runTime.exec("gpio write " + pinNumber + " 1");
                Thread.sleep(blinkSpeed);
@@ -33,11 +32,7 @@ public class LEDBlink {
     }
 
     public void stop() {
-        try {
-            toggle = false; 
-        }
-        catch (Exception e) {
-
-        }
+        running = false;
     }
+
 }
