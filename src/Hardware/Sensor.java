@@ -1,10 +1,6 @@
 package Hardware;
 
 import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Stack;
-
-import javax.management.Query;
 
 /** 
  * The class that will oversee the sensors and their input.
@@ -13,8 +9,8 @@ import javax.management.Query;
  */
 public class Sensor implements Runnable {
 	final int PIN_NUMBER;
-	private volatile boolean running = true;
-	private volatile LinkedList diskList;
+	private volatile boolean running;
+	volatile LinkedList<Disk> diskList;
 
 	public Sensor(int pinNumber) {
 		this.PIN_NUMBER = pinNumber;
@@ -23,11 +19,15 @@ public class Sensor implements Runnable {
 
 	public void run() {
 		try {
+			running = true;
 			Runtime runtime = Runtime.getRuntime();
 			runtime.exec("gpio mode "+PIN_NUMBER+" in");
 			while(running) {
-				if (/*condition*/) {
-					int color;
+				// TODO: need to find a way to receive input that disk is passin
+				// TODO: need to find a way to receive color of said color
+				boolean condition = false;
+				if (condition) {
+					int color = 0;
 					diskList.add(new Disk(color));
 				}
 			}
