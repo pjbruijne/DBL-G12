@@ -1,5 +1,6 @@
 import EmergencyState.*;
 import ErrorHandling.*;
+import Hardware.Sensor;
 
 /**
  * The main class for our robot that will automate the entire robot.
@@ -10,8 +11,13 @@ public class Main {
     //The global variables and constants we will be using during our program runs.
 
     //The variables for the motors
-    final int BELT_MOTOR_PIN_NUMBER = 3;
+    final int BELT_MOTOR_PIN_NUMBER = 1;
     final int ARM_MOTOR_PIN_NUMBER = 2;
+    //The variables for the sensors
+    final int INFRARED_SENSOR_PIN_NUMBER = 3;
+    final int COLOR_SENSOR_PIN_NUMBER = 5;
+    final Sensor SENSOR;
+    Thread sensorThread;
     //The variables for the emergency light
     final int EMERGENCY_PIN_NUMBER = 4;
     final int EMERGENCY_BLINK_SPEED = 500;
@@ -38,6 +44,7 @@ public class Main {
             wait(10000);
             ledBlink.stop();
             ledBlinkThread.join();
+            // TODO: we need to create threads for the motors and the sensors and call them.
         }
         catch (Error e) {
             toggleEmergencyState();
