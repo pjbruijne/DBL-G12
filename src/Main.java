@@ -13,6 +13,10 @@ public class Main {
     //The variables for the motors
     final int BELT_MOTOR_PIN_NUMBER = 1;
     final int ARM_MOTOR_PIN_NUMBER = 2;
+    final Motor ARM_MOTOR;
+    final Motor BELT_MOTOR;
+    Thread armThread;
+    Thread beltThread;
     //The variables for the sensors
     final int INFRARED_SENSOR_PIN_NUMBER = 3;
     final int COLOR_SENSOR_PIN_NUMBER = 5;
@@ -29,8 +33,10 @@ public class Main {
      * The initialization method of our main class. It will be used to create certain objects at the moment of creation.
      */
     public Main() {
+        ARM_MOTOR = new Motor(ARM_MOTOR_PIN_NUMBER);
+        BELT_MOTOR = new Motor(BELT_MOTOR_PIN_NUMBER);
+        SENSOR = new Sensor(INFRARED_SENSOR_PIN_NUMBER, COLOR_SENSOR_PIN_NUMBER);
         EMERGENCY_LIGHT = new LEDBlink(EMERGENCY_PIN_NUMBER, EMERGENCY_PIN_NUMBER);
-        
     }
 
 
