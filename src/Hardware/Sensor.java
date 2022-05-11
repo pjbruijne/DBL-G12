@@ -1,11 +1,30 @@
 package Hardware;
 
+import java.util.ArrayList;
+
 public class Sensor implements Runnable {
 	final int PIN_NUMBER;
 	private volatile boolean running = true;
 
+	ArrayList<Disk> stack;
+
 	public Sensor(int pinNumber) {
 		this.PIN_NUMBER = pinNumber;
+		stack = new ArrayList<Disk>();
+	}
+
+	/**
+     * The method to add a disk to the stack
+     */
+    public void addDisk(Disk disk) {
+        stack.add(disk);
+    }
+
+	/**
+	 * The method to remove the first disk from the stack
+	 */
+	public void removeDisk() {
+		stack.remove(0);
 	}
 
 	public void run() {
