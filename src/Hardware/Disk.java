@@ -1,4 +1,8 @@
 package Hardware;
+
+/**
+ * The class used for the disks.
+ */
 public class Disk {
 
     final private int color; // 0 = white, 1 = black
