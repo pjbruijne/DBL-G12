@@ -4,9 +4,11 @@ import Hardware.*;
 
 /**
  * The main class for our robot that will automate the entire robot.
+ * @author Tjeerd Roks
+ * @author Peter de Bruijne
  */
 public class Main {
-    //The pin numbers we use for certain parts of the robot and other necessary values
+    //The global variables and constants we will be using during our program runs.
 
     //The variables for the motors
     final int BELT_MOTOR_PIN_NUMBER = 3;

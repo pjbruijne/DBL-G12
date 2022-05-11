@@ -7,6 +7,8 @@ import ErrorHandling.Errors.SignalError;
 /**
  * The class to monitor and control the motors used by our robot. This will be used for both the motors in the arms and in the belt.
  * If necessary, we will create subclasses that will be devided between the arm motors and the belt motors.
+ * @author Tjeerd Roks
+ * @author Peter de Bruijne
  */
 public class Motor implements Runnable {
 	final private int PIN_NUMBER;

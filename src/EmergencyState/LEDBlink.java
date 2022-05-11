@@ -2,6 +2,8 @@ package EmergencyState;
 
 /**
  * The class to oversee the emergency light. It will be used in a seperate thread to allow for multiple routines happening simultaneously.
+ * @author Tjeerd Roks
+ * @author Peter de Bruijne
  */
 public class LEDBlink implements Runnable {
 
