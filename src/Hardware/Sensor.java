@@ -28,9 +28,9 @@ public class Sensor implements Runnable {
 			while(running) {
 				// TODO: need to find a way to receive input that disk is passin
 				// TODO: need to find a way to receive color of said color
-				if(/** infrared senses a disk */) {
+				if (/** infrared senses a disk */true) {
 					// Turn on color sensor
-					if(/** color is white */ ) {
+					if (/** color is white */) {
 						diskList.add(new Disk(0));
 					} else {
 						diskList.add(new Disk(1));
