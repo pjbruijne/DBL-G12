@@ -1,9 +1,9 @@
 package Hardware;
 public class Disk {
 
-    private int color; // 0 = white, 1 = black
-    private float diameter = 2.3f; // in cm
-    private float height = 1f; // in cm
+    final private int color; // 0 = white, 1 = black
+    final private float diameter = 2.3f; // in cm
+    final private float height = 1f; // in cm
 
     public Disk(int color) {
         this.color = color;
