@@ -1,6 +1,10 @@
 package Hardware;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Stack;
+
+import javax.management.Query;
 
 /** 
  * The class that will oversee the sensors and their input.
@@ -10,26 +14,11 @@ import java.util.ArrayList;
 public class Sensor implements Runnable {
 	final int PIN_NUMBER;
 	private volatile boolean running = true;
-
-	ArrayList<Disk> stack;
+	private volatile LinkedList<Disk> diskList;
 
 	public Sensor(int pinNumber) {
 		this.PIN_NUMBER = pinNumber;
-		stack = new ArrayList<Disk>();
-	}
-
-	/**
-     * The method to add a disk to the stack
-     */
-    public void addDisk(Disk disk) {
-        stack.add(disk);
-    }
-
-	/**
-	 * The method to remove the first disk from the stack
-	 */
-	public void removeDisk() {
-		stack.remove(0);
+		diskList = new LinkedList<Disk>();
 	}
 
 	public void run() {
@@ -37,7 +26,11 @@ public class Sensor implements Runnable {
 			Runtime runtime = Runtime.getRuntime();
 			runtime.exec("gpio mode "+PIN_NUMBER+" in");
 			while(running) {
-
+				if (/*disk is white*/) {
+					diskList.add(new Disk(0));
+				} else {
+					diskList.add(new Disk(1));
+				}
 			}
 		}
 		catch (InterruptedException e) {
