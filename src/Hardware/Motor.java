@@ -23,6 +23,7 @@ public class Motor implements Runnable {
 
 	public void run() {
 		try {
+			System.out.println("The motor on pin "+PIN_NUMBER+" has started running");
 			running = true;
 			Runtime runtime = Runtime.getRuntime();
 			runtime.exec("gpio mode "+PIN_NUMBER+" out");
@@ -31,16 +32,17 @@ public class Motor implements Runnable {
 			}
 			while(running);
 			runtime.exec("gpio write "+PIN_NUMBER+" 0");
+			System.out.println("The motor on pin "+PIN_NUMBER+" has stopped running");
 		}
 		catch (InterruptedException e) {
-			System.out.println("One of the motor threads got interrupted");
+			System.out.println("The motor on pin "+PIN_NUMBER+" got interrupted");
             Thread.currentThread().interrupt();
 		}
 		catch (IOException e) {
-			throw new SignalError();
+			throw new SignalError("Signal Error: The motor on pin "+PIN_NUMBER+" lost connection to the Raspberry Pi.");
 		}
 		catch (Exception e) {
-
+			System.out.println(e);
 		}
 	}
 
