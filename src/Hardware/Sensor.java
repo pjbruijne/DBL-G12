@@ -13,11 +13,12 @@ public class Sensor implements Runnable {
 			Runtime runtime = Runtime.getRuntime();
 			runtime.exec("gpio mode "+PIN_NUMBER+" in");
 			while(running) {
-				
+
 			}
 		}
 		catch (InterruptedException e) {
-
+			System.out.println("The sensor thread got interrupted");
+            Thread.currentThread().interrupt();
 		}
 		catch (Exception e) {
 

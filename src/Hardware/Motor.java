@@ -30,7 +30,8 @@ public class Motor implements Runnable {
 			runtime.exec("gpio write "+PIN_NUMBER+" 0");
 		}
 		catch (InterruptedException e) {
-
+			System.out.println("One of the motor threads got interrupted");
+            Thread.currentThread().interrupt();
 		}
 		catch (IOException e) {
 			throw new SignalError();

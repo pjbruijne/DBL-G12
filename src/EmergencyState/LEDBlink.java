@@ -29,7 +29,7 @@ public class LEDBlink implements Runnable {
                Thread.sleep(BLINK_SPEED);
             }
         } catch (InterruptedException e) {
-            System.out.println("Exception occured: " + e.getMessage());
+            System.out.println("The LEDBlink thread got interrupted");
             Thread.currentThread().interrupt();
         } 
         catch (Exception e) {
