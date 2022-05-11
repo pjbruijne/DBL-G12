@@ -11,26 +11,39 @@ public class Main {
     LEDBlink emergencyLight;
     Thread emergencyThread;
 
-
+    /**
+     * The initialization method of our main class. It will be used to create certain objects at the moment of creation.
+     */
     public Main() {
         emergencyLight = new LEDBlink(emergencyPin, emergencyBlinkSpeed);
     }
 
+    /**
+     * The method to be run by the Main class. Everything the program will have to do will be handled by this function
+     */
     public void run() {
         try {
             LEDBlink ledBlink = new LEDBlink(4, 500);
             Thread ledBlinkThread = new Thread(ledBlink);
             ledBlinkThread.start();
-            Thread.sleep(10000);
+            wait(10000);
             ledBlink.stop();
             ledBlinkThread.join();
         }
-        catch (Exception | Error e) {
+        catch (Error e) {
+            toggleEmergencyState();
+            wait(10000);
+
+        }
+        catch (Exception e) {
 
         }
 
     }
 
+    /**
+     * The toggle switch for the emergency state. In emergency state the emergency LED will start blinking periodically.
+     */
     void toggleEmergencyState() {
         try {
             if (!emergencyState) {  // if there is no emergency before toggling
@@ -45,10 +58,29 @@ public class Main {
             }
         }
         catch (InterruptedException e) {
-
+            System.out.println("The current thread got interrupted");
+            Thread.currentThread().interrupt();
         }
     }
 
+    /**
+     * A method for quickly issuing a sleep in the thread without having to deal with the exception all the time.
+     * @param waitTime The time to wait for the thread to resume
+     */
+    public void wait(int waitTime) {
+        try {
+            Thread.sleep(waitTime);
+        }
+        catch (InterruptedException e) {
+            System.out.println("The current thread got interrupted");
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * The method called by the main thread. It first prints out the exiting hotkey in the print stream before calling the run function.
+     * @param args
+     */
     public static void main(String[] args) {
         // Just a blinking led effect
         System.out.println("Press CTRL-C to exit");

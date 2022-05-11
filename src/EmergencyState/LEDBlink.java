@@ -2,8 +2,8 @@ package EmergencyState;
 
 public class LEDBlink implements Runnable {
 
-    private int pinNumber; // WiringPin diagram
-    private int blinkSpeed; // in miliseconds
+    final private int pinNumber; // WiringPin diagram
+    final private int blinkSpeed; // in miliseconds
     private volatile boolean running = true; // to turn blinking on and off
 
     // Constructor
@@ -25,7 +25,11 @@ public class LEDBlink implements Runnable {
                runTime.exec("gpio write " + pinNumber + " 0");
                Thread.sleep(blinkSpeed);
             }
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            System.out.println("Exception occured: " + e.getMessage());
+            Thread.currentThread().interrupt();
+        } 
+        catch (Exception e) {
             // TODO: Error handling!
             System.out.println("Exception occured: " + e.getMessage());
         }
