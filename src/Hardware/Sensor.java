@@ -8,12 +8,14 @@ import java.util.LinkedList;
  * @author Peter de Bruijne
  */
 public class Sensor implements Runnable {
-	final int PIN_NUMBER;
+	final int PIN_NUMBER_INFRARED;
+	final int PIN_NUMBER_COLOR;
 	private volatile boolean running;
 	volatile LinkedList<Disk> diskList;
 
-	public Sensor(int pinNumber) {
-		this.PIN_NUMBER = pinNumber;
+	public Sensor(int pinNumberInfrared, int pinNumberColor) {
+		this.PIN_NUMBER_INFRARED = pinNumberInfrared;
+		this.PIN_NUMBER_COLOR = pinNumberColor;
 		diskList = new LinkedList<Disk>();
 	}
 
@@ -21,14 +23,19 @@ public class Sensor implements Runnable {
 		try {
 			running = true;
 			Runtime runtime = Runtime.getRuntime();
-			runtime.exec("gpio mode "+PIN_NUMBER+" in");
+			runtime.exec("gpio mode " + PIN_NUMBER_INFRARED + " in");
+			runtime.exec("gpio mode " + PIN_NUMBER_COLOR + " in");
 			while(running) {
 				// TODO: need to find a way to receive input that disk is passin
 				// TODO: need to find a way to receive color of said color
-				boolean condition = false;
-				if (condition) {
-					int color = 0;
-					diskList.add(new Disk(color));
+				if(/** infrared senses a disk */) {
+					// Turn on color sensor
+					if(/** color is white */ ) {
+						diskList.add(new Disk(0));
+					} else {
+						diskList.add(new Disk(1));
+					}
+					// Turn off color sensor
 				}
 			}
 		}
