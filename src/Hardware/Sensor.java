@@ -1,5 +1,10 @@
 package Hardware;
 
+/** 
+ * The class that will oversee the sensors and their input.
+ * @author Tjeerd Roks
+ * @author Peter de Bruijne
+ */
 public class Sensor implements Runnable {
 	final int PIN_NUMBER;
 	private volatile boolean running = true;
