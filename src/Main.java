@@ -1,6 +1,6 @@
 import EmergencyState.*;
 import ErrorHandling.*;
-import Hardware.Sensor;
+import Hardware.*;
 
 /**
  * The main class for our robot that will automate the entire robot.
@@ -30,8 +30,9 @@ public class Main {
      */
     public Main() {
         EMERGENCY_LIGHT = new LEDBlink(EMERGENCY_PIN_NUMBER, EMERGENCY_PIN_NUMBER);
-
+        
     }
+
 
     /**
      * The method to be run by the Main class. Everything the program will have to do will be handled by this function
@@ -98,7 +99,6 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        System.out.println("Press CTRL-C to exit");
         (new Main()).run();
     }
 
