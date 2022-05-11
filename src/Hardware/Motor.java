@@ -12,7 +12,7 @@ import ErrorHandling.Errors.SignalError;
  */
 public class Motor implements Runnable {
 	final private int PIN_NUMBER;
-	volatile boolean running = true;
+	volatile boolean running;
 
 	/**
 	 * The initialization of the motor class.
@@ -23,6 +23,7 @@ public class Motor implements Runnable {
 
 	public void run() {
 		try {
+			running = true;
 			Runtime runtime = Runtime.getRuntime();
 			runtime.exec("gpio mode "+PIN_NUMBER+" out");
 			do {
