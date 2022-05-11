@@ -27,7 +27,7 @@ public class Sensor implements Runnable {
 			runtime.exec("gpio mode " + PIN_NUMBER_COLOR + " in");
 			while(running) {
 				// TODO: need to find a way to receive input that disk is passin
-				// TODO: need to find a way to receive color of said color
+				// TODO: need to find a way to receive color of said disk
 				if(/** infrared senses a disk */) {
 					// Turn on color sensor
 					if(/** color is white */ ) {
