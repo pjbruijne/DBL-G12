@@ -3,10 +3,12 @@ import ErrorHandling.*;
 
 public class Main {
     //The pin numbers we use for certain parts of the robot and other necessary values
-    final int motorPin = 5;
 
-    final int emergencyPin = 4;
-    final int emergencyBlinkSpeed = 500;
+    //The variables for the motors
+    final int MOTOR_PIN_NUMBER = 5;
+    //The variables for the emergency light
+    final int EMERGENCY_PIN_NUMBER = 4;
+    final int EMERGENCY_BLINK_SPEED = 500;
     boolean emergencyState = false;
     LEDBlink emergencyLight;
     Thread emergencyThread;
@@ -15,7 +17,7 @@ public class Main {
      * The initialization method of our main class. It will be used to create certain objects at the moment of creation.
      */
     public Main() {
-        emergencyLight = new LEDBlink(emergencyPin, emergencyBlinkSpeed);
+        emergencyLight = new LEDBlink(EMERGENCY_PIN_NUMBER, MOTOR_PIN_NUMBER);
     }
 
     /**
@@ -23,7 +25,7 @@ public class Main {
      */
     public void run() {
         try {
-            LEDBlink ledBlink = new LEDBlink(4, 500);
+            LEDBlink ledBlink = new LEDBlink(EMERGENCY_PIN_NUMBER, EMERGENCY_BLINK_SPEED);
             Thread ledBlinkThread = new Thread(ledBlink);
             ledBlinkThread.start();
             wait(10000);
@@ -82,7 +84,6 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        // Just a blinking led effect
         System.out.println("Press CTRL-C to exit");
         (new Main()).run();
     }
