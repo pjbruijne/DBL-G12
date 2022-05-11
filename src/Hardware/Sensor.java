@@ -27,18 +27,12 @@ public class Sensor implements Runnable {
 			runtime.exec("gpio mode " + PIN_NUMBER_COLOR + " in");
 			while(running) {
 				// TODO: need to find a way to receive input that disk is passin
-				// TODO: need to find a way to receive color of said color
-				if (/** infrared senses a disk */true) {
+				if(/** infrared senses a disk */) {
 					// Turn on color sensor
-					if (/** color is white */) {
-						diskList.add(new Disk(0));
-					} else {
-						diskList.add(new Disk(1));
 					}
 					// Turn off color sensor
 				}
 			}
-		}
 		catch (InterruptedException e) {
 			System.out.println("The sensor thread got interrupted");
             Thread.currentThread().interrupt();
@@ -47,7 +41,6 @@ public class Sensor implements Runnable {
 
 		}
 	}
-
 	public void stop() {
 		running = false;
 	}
