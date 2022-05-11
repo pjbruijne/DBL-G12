@@ -1,23 +1,28 @@
 import EmergencyState.*;
 import ErrorHandling.*;
 
+/**
+ * The main class for our robot that will automate the entire robot.
+ */
 public class Main {
     //The pin numbers we use for certain parts of the robot and other necessary values
 
     //The variables for the motors
-    final int MOTOR_PIN_NUMBER = 5;
+    final int BELT_MOTOR_PIN_NUMBER = 3;
+    final int ARM_MOTOR_PIN_NUMBER = 2;
     //The variables for the emergency light
     final int EMERGENCY_PIN_NUMBER = 4;
     final int EMERGENCY_BLINK_SPEED = 500;
+    final LEDBlink EMERGENCY_LIGHT;
     boolean emergencyState = false;
-    LEDBlink emergencyLight;
     Thread emergencyThread;
 
     /**
      * The initialization method of our main class. It will be used to create certain objects at the moment of creation.
      */
     public Main() {
-        emergencyLight = new LEDBlink(EMERGENCY_PIN_NUMBER, MOTOR_PIN_NUMBER);
+        EMERGENCY_LIGHT = new LEDBlink(EMERGENCY_PIN_NUMBER, EMERGENCY_PIN_NUMBER);
+
     }
 
     /**
@@ -38,7 +43,7 @@ public class Main {
 
         }
         catch (Exception e) {
-
+            System.out.println(e);
         }
 
     }
@@ -48,14 +53,14 @@ public class Main {
      */
     void toggleEmergencyState() {
         try {
-            if (!emergencyState) {  // if there is no emergency before toggling
-                Thread emergencyThread = new Thread(emergencyLight); // create thread for emergency light to blink
+            if (!emergencyState) {      // if there is no emergency before toggling
+                Thread emergencyThread = new Thread(EMERGENCY_LIGHT); // create thread for emergency light to blink
                 emergencyThread.start();
                 emergencyState = true;  // set the emergency state to true
             }
-            else {  // if the emergency state is already on before toggling
-                emergencyLight.stop();  // stop the blinking
-                emergencyThread.join();
+            else {                      // if the emergency state is already on before toggling
+                EMERGENCY_LIGHT.stop(); // stop the blinking
+                emergencyThread.join(); // wait for the emergency light thread to die
                 emergencyState = false; // set the emergency state to false
             }
         }
