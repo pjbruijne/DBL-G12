@@ -1,3 +1,4 @@
+package Hardware;
 public class Disk {
 
     private int color; // 0 = white, 1 = black
