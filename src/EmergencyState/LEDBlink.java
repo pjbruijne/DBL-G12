@@ -9,7 +9,7 @@ public class LEDBlink implements Runnable {
 
     final private int PIN_NUMBER; // WiringPin diagram
     final private int BLINK_SPEED; // in miliseconds
-    private volatile boolean running = true; // to turn blinking on and off
+    private volatile boolean running; // to turn blinking on and off
 
     // Constructor
     public LEDBlink(int pinNumber, int blinkSpeed) {
@@ -19,10 +19,11 @@ public class LEDBlink implements Runnable {
 
     public void run() {
         try {
-           Runtime runTime = Runtime.getRuntime();
-           // Set the pin to receiving
+            running = true;
+            Runtime runTime = Runtime.getRuntime();
+            // Set the pin to receiving
             runTime.exec("gpio mode " + PIN_NUMBER + " out");
-           while(running) {
+            while(running) {
                // Set the pin to high and wait
                runTime.exec("gpio write " + PIN_NUMBER + " 1");
                Thread.sleep(BLINK_SPEED);
