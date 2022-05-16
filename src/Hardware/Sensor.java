@@ -1,47 +1,45 @@
 package Hardware;
 
 import java.util.LinkedList;
+import org.sintef.jarduino.*;
 
 /** 
  * The class that will oversee the sensors and their input.
  * @author Tjeerd Roks
  * @author Peter de Bruijne
  */
-public class Sensor implements Runnable {
-	final int PIN_NUMBER_INFRARED;
-	final int PIN_NUMBER_COLOR;
-	private volatile boolean running;
+public class Sensor extends JArduino {
+	final private int PIN_NUMBER_IR;
+	final private int PIN_NUMBER_COLOR;
+	final private DigitalPin PIN_IR;
+	final private DigitalPin PIN_COLOR;
 	volatile LinkedList<Disk> diskList;
 
-	public Sensor(int pinNumberInfrared, int pinNumberColor) {
-		this.PIN_NUMBER_INFRARED = pinNumberInfrared;
+	public Sensor(String port, int pinNumberInfrared, int pinNumberColor) {
+		super(port);
+		this.PIN_NUMBER_IR = pinNumberInfrared;
 		this.PIN_NUMBER_COLOR = pinNumberColor;
+		PIN_IR = DigitalPin.fromValue((byte) PIN_NUMBER_IR);
+		PIN_COLOR = DigitalPin.fromValue((byte) PIN_NUMBER_COLOR);
 		diskList = new LinkedList<Disk>();
 	}
 
-	public void run() {
-		try {
-			running = true;
-			Runtime runtime = Runtime.getRuntime();
-			runtime.exec("gpio mode " + PIN_NUMBER_INFRARED + " in");
-			runtime.exec("gpio mode " + PIN_NUMBER_COLOR + " in");
-			while(running) {
-				// TODO: need to find a way to receive input that disk is passin
-				if(/** infrared senses a disk */) {
-					// Turn on color sensor
-					}
-					// Turn off color sensor
-				}
-			}
-		catch (InterruptedException e) {
-			System.out.println("The sensor thread got interrupted");
-            Thread.currentThread().interrupt();
-		}
-		catch (Exception e) {
-
-		}
+	public void setup() {
+		pinMode(PIN_IR, PinMode.INPUT);
+		pinMode(PIN_COLOR, PinMode.INPUT);
 	}
-	public void stop() {
-		running = false;
+
+	public void loop() {
+		try {
+			// TODO: create PIN_IR input var
+			// TODO: create PIN_COLOR input var
+			// if (condition) {
+			// TODO: create input var reactive code
+			// }
+		} catch (Exception e) {
+			// TODO: Exception handling
+		} catch (Error e) {
+			// TODO: Error handling
+		}
 	}
 }
