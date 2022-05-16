@@ -1,48 +1,41 @@
 package EmergencyState;
+import org.sintef.jarduino.*;
 
 /**
  * The class to oversee the emergency light. It will be used in a seperate thread to allow for multiple routines happening simultaneously.
  * @author Tjeerd Roks
  * @author Peter de Bruijne
  */
-public class LEDBlink implements Runnable {
+public class LEDBlink extends JArduino {
 
-    final private int PIN_NUMBER; // WiringPin diagram
-    final private int BLINK_SPEED; // in miliseconds
-    private volatile boolean running; // to turn blinking on and off
+    final private int PIN_NUMBER;   // WiringPin diagram
+    final private int BLINK_SPEED;  // The time the light stays on/off in miliseconds
+    final private DigitalPin PIN;   // The pin variable to be initialized with the pin number
 
     // Constructor
-    public LEDBlink(int pinNumber, int blinkSpeed) {
+    public LEDBlink(String port ,int pinNumber, int blinkSpeed) {
+        super(port);
         this.PIN_NUMBER = pinNumber;
         this.BLINK_SPEED = blinkSpeed;
+        this.PIN = DigitalPin.fromValue((byte) PIN_NUMBER);
     }
 
-    public void run() {
+    public void setup() {
+        pinMode(PIN, PinMode.OUTPUT);
+    }
+
+    public void loop() {
         try {
-            running = true;
-            Runtime runTime = Runtime.getRuntime();
-            // Set the pin to receiving
-            runTime.exec("gpio mode " + PIN_NUMBER + " out");
-            while(running) {
-               // Set the pin to high and wait
-               runTime.exec("gpio write " + PIN_NUMBER + " 1");
-               Thread.sleep(BLINK_SPEED);
-               // Set the pin to low and wait
-               runTime.exec("gpio write " + PIN_NUMBER + " 0");
-               Thread.sleep(BLINK_SPEED);
-            }
-        } catch (InterruptedException e) {
-            System.out.println("The LEDBlink thread got interrupted");
-            Thread.currentThread().interrupt();
-        } 
-        catch (Exception e) {
-            // TODO: Error handling!
+            digitalWrite(PIN, DigitalState.HIGH); 
+            delay(BLINK_SPEED);
+            digitalWrite(PIN, DigitalState.LOW);
+            delay(BLINK_SPEED);
+        } catch (Exception e) {
+            // TODO: Exception handling
             System.out.println("Exception occured: " + e.getMessage());
+        } catch (Error e) {
+            // TODO: Error handling
         }
-    }
-
-    public void stop() {
-        running = false;
     }
 
 }
