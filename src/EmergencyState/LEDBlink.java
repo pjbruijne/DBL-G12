@@ -1,5 +1,6 @@
 package EmergencyState;
 import org.sintef.jarduino.*;
+import org.sintef.jarduino.comm.Serial4JArduino;
 
 /**
  * The class to oversee the emergency light. It will be used in a seperate thread to allow for multiple routines happening simultaneously.
@@ -38,4 +39,14 @@ public class LEDBlink extends JArduino {
         }
     }
 
+    public static void main(String[] args) {
+        String serialPort;
+        if (args.length == 1) {
+            serialPort = args[0];
+        } else {
+            serialPort = Serial4JArduino.selectSerialPort();
+        }
+        LEDBlink testBlink = new LEDBlink(serialPort, 13, 500);
+        testBlink.runArduinoProcess();
+    }
 }
