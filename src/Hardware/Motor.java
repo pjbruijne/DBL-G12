@@ -1,8 +1,5 @@
 package Hardware;
-
-import java.io.IOException;
-
-import ErrorHandling.Errors.SignalError;
+import org.sintef.jarduino.*;
 
 /**
  * The class to monitor and control the motors used by our robot. This will be used for both the motors in the arms and in the belt.
@@ -10,43 +7,43 @@ import ErrorHandling.Errors.SignalError;
  * @author Tjeerd Roks
  * @author Peter de Bruijne
  */
-public class Motor implements Runnable {
+public class Motor extends JArduino {
 	final private int PIN_NUMBER;
-	volatile boolean running;
+	final private DigitalPin PIN;
 
 	/**
 	 * The initialization of the motor class.
 	 */
-	public Motor(int pinNumber) {
+	public Motor(String port ,int pinNumber) {
+		super(port);
 		this.PIN_NUMBER = pinNumber;
+		this.PIN = DigitalPin.fromValue((byte) PIN_NUMBER);
 	}
 
-	public void run() {
+	public void setup() {
+		pinMode(PIN, PinMode.OUTPUT);
+	}
+
+	public void loop() {
 		try {
-			System.out.println("The motor on pin "+PIN_NUMBER+" has started running");
-			running = true;
-			Runtime runtime = Runtime.getRuntime();
-			runtime.exec("gpio mode "+PIN_NUMBER+" out");
-			do {
-				runtime.exec("gpio write "+PIN_NUMBER+" 1");
-			}
-			while(running);
-			runtime.exec("gpio write "+PIN_NUMBER+" 0");
-			System.out.println("The motor on pin "+PIN_NUMBER+" has stopped running");
-		}
-		catch (InterruptedException e) {
-			System.out.println("The motor on pin "+PIN_NUMBER+" got interrupted");
-            Thread.currentThread().interrupt();
-		}
-		catch (IOException e) {
-			throw new SignalError("Signal Error: The motor on pin "+PIN_NUMBER+" lost connection to the Raspberry Pi.");
-		}
-		catch (Exception e) {
-			System.out.println(e);
+			// TODO: loop structure motors
+		} catch (Exception e) {
+			// TODO: Exception handling
+		} catch (Error e) {
+			// TODO: Error handling
 		}
 	}
 
-	public void stop() {
-		running = false;
+	@Override
+	public void runArduinoProcess() {
+		super.runArduinoProcess();
+		digitalWrite(PIN, DigitalState.HIGH);
+	}
+	
+	@Override
+	public void stopArduinoProcess() {
+		digitalWrite(PIN, DigitalState.LOW);
+		super.stopArduinoProcess();
+		System.out.println("The motor on pin "+PIN_NUMBER+" has been stopped");
 	}
 }
