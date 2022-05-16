@@ -1,7 +1,7 @@
+import org.sintef.jarduino.*;
 import EmergencyState.*;
 import ErrorHandling.*;
 import Hardware.*;
-
 /**
  * The main class for our robot that will automate the entire robot.
  * @author Tjeerd Roks
@@ -10,6 +10,8 @@ import Hardware.*;
 public class Main {
     //The global variables and constants we will be using during our program runs.
 
+    //The arduino variables
+    final private String PORT;
     //The variables for the motors
     final int BELT_MOTOR_PIN_NUMBER = 1;
     final int ARM_MOTOR_PIN_NUMBER = 2;
@@ -23,20 +25,20 @@ public class Main {
     final Sensor SENSOR;
     Thread sensorThread;
     //The variables for the emergency light
-    final int EMERGENCY_PIN_NUMBER = 4;
+    final int EMERGENCY_PIN_NUMBER = 13;
     final int EMERGENCY_BLINK_SPEED = 500;
     final LEDBlink EMERGENCY_LIGHT;
     boolean emergencyState = false;
-    Thread emergencyThread;
 
     /**
      * The initialization method of our main class. It will be used to create certain objects at the moment of creation.
      */
     public Main() {
-        ARM_MOTOR = new Motor(ARM_MOTOR_PIN_NUMBER);
-        BELT_MOTOR = new Motor(BELT_MOTOR_PIN_NUMBER);
-        SENSOR = new Sensor(INFRARED_SENSOR_PIN_NUMBER, COLOR_SENSOR_PIN_NUMBER);
-        EMERGENCY_LIGHT = new LEDBlink(EMERGENCY_PIN_NUMBER, EMERGENCY_PIN_NUMBER);
+        PORT = "";
+        ARM_MOTOR = new Motor(PORT, ARM_MOTOR_PIN_NUMBER);
+        BELT_MOTOR = new Motor(PORT, BELT_MOTOR_PIN_NUMBER);
+        SENSOR = new Sensor(PORT, INFRARED_SENSOR_PIN_NUMBER, COLOR_SENSOR_PIN_NUMBER);
+        EMERGENCY_LIGHT = new LEDBlink(PORT,EMERGENCY_PIN_NUMBER, EMERGENCY_BLINK_SPEED);
     }
 
 
@@ -45,13 +47,7 @@ public class Main {
      */
     public void run() {
         try {
-            LEDBlink ledBlink = new LEDBlink(EMERGENCY_PIN_NUMBER, EMERGENCY_BLINK_SPEED);
-            Thread ledBlinkThread = new Thread(ledBlink);
-            ledBlinkThread.start();
-            wait(10000);
-            ledBlink.stop();
-            ledBlinkThread.join();
-            // TODO: we need to create threads for the motors and the sensors and call them.
+            // TODO: main run statements
         }
         catch (Error e) {
             toggleEmergencyState();
@@ -70,19 +66,17 @@ public class Main {
     void toggleEmergencyState() {
         try {
             if (!emergencyState) {      // if there is no emergency before toggling
-                Thread emergencyThread = new Thread(EMERGENCY_LIGHT); // create thread for emergency light to blink
-                emergencyThread.start();
+                EMERGENCY_LIGHT.runArduinoProcess();    // run process to make led blink
                 emergencyState = true;  // set the emergency state to true
             }
             else {                      // if the emergency state is already on before toggling
-                EMERGENCY_LIGHT.stop(); // stop the blinking
-                emergencyThread.join(); // wait for the emergency light thread to die
+                EMERGENCY_LIGHT.stopArduinoProcess(); // stop blinking process
                 emergencyState = false; // set the emergency state to false
             }
-        }
-        catch (InterruptedException e) {
-            System.out.println("The current thread got interrupted");
-            Thread.currentThread().interrupt();
+        } catch (Exception e) {
+            // TODO: toggleEmergencyState exception handling
+        } catch (Error e) {
+            // TODO: toggleEmergencyState error handling
         }
     }
 
