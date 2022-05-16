@@ -44,6 +44,5 @@ public class Motor extends JArduino {
 	public void stopArduinoProcess() {
 		digitalWrite(PIN, DigitalState.LOW);
 		super.stopArduinoProcess();
-		System.out.println("The motor on pin "+PIN_NUMBER+" has been stopped");
 	}
 }
