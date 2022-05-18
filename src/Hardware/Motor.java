@@ -1,5 +1,6 @@
 package Hardware;
 import org.sintef.jarduino.*;
+import org.sintef.jarduino.comm.Serial4JArduino;
 
 /**
  * The class to monitor and control the motors used by our robot. This will be used for both the motors in the arms and in the belt.
@@ -86,5 +87,15 @@ public class Motor extends JArduino {
 
 	public int getDirection() {
 		return direction;
+	}
+
+	public static void main(String[] args) {
+		String serialPort;
+        if (args.length == 1) {
+            serialPort = args[0];
+        } else {
+            serialPort = Serial4JArduino.selectSerialPort();
+        }
+		Motor arm = new Motor(serialPort, 3);
 	}
 }
