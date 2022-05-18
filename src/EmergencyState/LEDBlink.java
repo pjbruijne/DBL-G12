@@ -46,7 +46,7 @@ public class LEDBlink extends JArduino {
         } else {
             serialPort = Serial4JArduino.selectSerialPort();
         }
-        LEDBlink testBlink = new LEDBlink(serialPort, 13, 500);
+        LEDBlink testBlink = new LEDBlink(serialPort, 13, 5000);
         testBlink.runArduinoProcess();
     }
 }
