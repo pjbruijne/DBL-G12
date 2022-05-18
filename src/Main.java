@@ -22,6 +22,7 @@ public class Main {
     final int ARM_MOTOR_CLOCK_PIN_NUMBER = 3;
     final int ARM_MOTOR_COUNTER_CLOCK_PIN_NUMBER = 4;
     final Motor ARM_MOTOR;
+    final int GRAB_TIME = 1500;
     //The variables for the sensors
     final int INFRARED_SENSOR_PIN_NUMBER = 6;
     final int COLOR_SENSOR_PIN_NUMBER = 7;
@@ -84,11 +85,11 @@ public class Main {
     void grabDisk(Motor motor) {
         motor.setClockWise();
         motor.runArduinoProcess();
-        wait(1500);
+        wait(GRAB_TIME);
         motor.stopArduinoProcess();
         motor.setCounterClockWise();
         motor.runArduinoProcess();
-        wait(1500);
+        wait(GRAB_TIME);
         motor.stopArduinoProcess();
     }
 
