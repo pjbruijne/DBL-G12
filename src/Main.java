@@ -1,4 +1,6 @@
 import org.sintef.jarduino.*;
+import org.sintef.jarduino.comm.Serial4JArduino;
+
 import EmergencyState.*;
 import ErrorHandling.*;
 import Hardware.*;
@@ -10,20 +12,21 @@ import Hardware.*;
 public class Main {
     //The global variables and constants we will be using during our program runs.
 
-    //The arduino variables
+    //The variables for the arduino
     final private String PORT;
-    //The variables for the motors
+    //The variables for the belt motor
     final int BELT_MOTOR_PIN_NUMBER = 1;
-    final int ARM_MOTOR_PIN_NUMBER = 2;
-    final Motor ARM_MOTOR;
     final Motor BELT_MOTOR;
-    Thread armThread;
-    Thread beltThread;
+    //The variables for the arm motor
+    final int ARM_MOTOR_PIN_NUMBER = 2;
+    final int ARM_MOTOR_CLOCK_PIN_NUMBER = 3;
+    final int ARM_MOTOR_COUNTER_CLOCK_PIN_NUMBER = 4;
+    final Motor ARM_MOTOR;
+    final int GRAB_TIME = 1500;
     //The variables for the sensors
-    final int INFRARED_SENSOR_PIN_NUMBER = 3;
-    final int COLOR_SENSOR_PIN_NUMBER = 5;
+    final int INFRARED_SENSOR_PIN_NUMBER = 6;
+    final int COLOR_SENSOR_PIN_NUMBER = 7;
     final Sensor SENSOR;
-    Thread sensorThread;
     //The variables for the emergency light
     final int EMERGENCY_PIN_NUMBER = 13;
     final int EMERGENCY_BLINK_SPEED = 500;
@@ -33,9 +36,9 @@ public class Main {
     /**
      * The initialization method of our main class. It will be used to create certain objects at the moment of creation.
      */
-    public Main() {
-        PORT = "";
-        ARM_MOTOR = new Motor(PORT, ARM_MOTOR_PIN_NUMBER);
+    public Main(String port) {
+        PORT = port;
+        ARM_MOTOR = new Motor(PORT, ARM_MOTOR_PIN_NUMBER, ARM_MOTOR_CLOCK_PIN_NUMBER, ARM_MOTOR_COUNTER_CLOCK_PIN_NUMBER);
         BELT_MOTOR = new Motor(PORT, BELT_MOTOR_PIN_NUMBER);
         SENSOR = new Sensor(PORT, INFRARED_SENSOR_PIN_NUMBER, COLOR_SENSOR_PIN_NUMBER);
         EMERGENCY_LIGHT = new LEDBlink(PORT,EMERGENCY_PIN_NUMBER, EMERGENCY_BLINK_SPEED);
@@ -48,12 +51,12 @@ public class Main {
     public void run() {
         try {
             // TODO: main run statements
-        }
-        catch (Error e) {
-            toggleEmergencyState();
-            wait(10000);
+            grabDisk(ARM_MOTOR);
 
-        }
+        } //catch (Error e) {
+            // toggleEmergencyState();
+            // wait(10000);
+        //}
         catch (Exception e) {
             System.out.println(e);
         }
@@ -80,6 +83,17 @@ public class Main {
         }
     }
 
+    void grabDisk(Motor motor) {
+        motor.setClockWise();
+        motor.runArduinoProcess();
+        wait(GRAB_TIME);
+        motor.stopArduinoProcess();
+        motor.setCounterClockWise();
+        motor.runArduinoProcess();
+        wait(GRAB_TIME);
+        motor.stopArduinoProcess();
+    }
+
     /**
      * A method for quickly issuing a sleep in the thread without having to deal with the exception all the time.
      * @param waitTime The time to wait for the thread to resume
@@ -99,7 +113,13 @@ public class Main {
      * @param args
      */
     public static void main(String[] args) {
-        (new Main()).run();
+        String serialPort;
+        if (args.length == 1) {
+            serialPort = args[0];
+        } else {
+            serialPort = Serial4JArduino.selectSerialPort();
+        }
+        (new Main(serialPort)).run();
     }
 
 }
