@@ -83,17 +83,6 @@ public class Main {
         }
     }
 
-    void grabDisk(Motor motor) {
-        motor.setClockWise();
-        motor.runArduinoProcess();
-        wait(GRAB_TIME);
-        motor.stopArduinoProcess();
-        motor.setCounterClockWise();
-        motor.runArduinoProcess();
-        wait(GRAB_TIME);
-        motor.stopArduinoProcess();
-    }
-
     /**
      * A method for quickly issuing a sleep in the thread without having to deal with the exception all the time.
      * @param waitTime The time to wait for the thread to resume

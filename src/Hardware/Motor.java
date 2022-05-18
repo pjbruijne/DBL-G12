@@ -89,6 +89,17 @@ public class Motor extends JArduino {
 		return direction;
 	}
 
+	void grabDisk() {
+        this.setClockWise();
+        this.runArduinoProcess();
+        delay(3000);
+        this.stopArduinoProcess();
+        this.setCounterClockWise();
+        this.runArduinoProcess();
+        delay(3000);
+        this.stopArduinoProcess();
+    }
+
 	public static void main(String[] args) {
 		String serialPort;
         if (args.length == 1) {
@@ -96,13 +107,10 @@ public class Motor extends JArduino {
         } else {
             serialPort = Serial4JArduino.selectSerialPort();
         }
-		Motor arm = new Motor(serialPort, 11);
+		Motor arm = new Motor(serialPort, 11,2,3);
+		arm.setClockWise();
 		arm.runArduinoProcess();
-		try {
-			Thread.sleep(1000);
-		} catch (Exception e) {
-
-		}
+		arm.grabDisk();
 		arm.stopArduinoProcess();
 	}
 }
