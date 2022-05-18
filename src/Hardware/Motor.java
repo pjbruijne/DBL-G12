@@ -96,6 +96,13 @@ public class Motor extends JArduino {
         } else {
             serialPort = Serial4JArduino.selectSerialPort();
         }
-		Motor arm = new Motor(serialPort, 3);
+		Motor arm = new Motor(serialPort, 11);
+		arm.runArduinoProcess();
+		try {
+			Thread.sleep(1000);
+		} catch (Exception e) {
+
+		}
+		arm.stopArduinoProcess();
 	}
 }
