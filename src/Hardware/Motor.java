@@ -8,20 +8,42 @@ import org.sintef.jarduino.*;
  * @author Peter de Bruijne
  */
 public class Motor extends JArduino {
-	final private int PIN_NUMBER;
-	final private DigitalPin PIN;
+	final private int POWER_PIN_NUMBER;
+	final private PWMPin POWER_PIN;
+	final private int DIRECTION_PIN_NUMBER;
+	final private DigitalPin DIRECTION_PIN;
+	final private int COUNTER_DIRECTION_PIN_NUMBER;
+	final private DigitalPin COUNTER_DIRECTION_PIN;
+	private int direction = 0;	// 0 means clockwise, 1 means counterclockwise
 
 	/**
 	 * The initialization of the motor class.
 	 */
-	public Motor(String port ,int pinNumber) {
+	public Motor(String port , int powerPinNumber, int directionPinNumber, int counterDirectionPinNumber) {
 		super(port);
-		this.PIN_NUMBER = pinNumber;
-		this.PIN = DigitalPin.fromValue((byte) PIN_NUMBER);
+		this.POWER_PIN_NUMBER = powerPinNumber;
+		this.POWER_PIN = PWMPin.fromValue((byte) POWER_PIN_NUMBER);
+		this.DIRECTION_PIN_NUMBER = directionPinNumber;
+		this.DIRECTION_PIN = DigitalPin.fromValue((byte) DIRECTION_PIN_NUMBER);
+		this.COUNTER_DIRECTION_PIN_NUMBER = counterDirectionPinNumber;
+		this.COUNTER_DIRECTION_PIN = DigitalPin.fromValue((byte) COUNTER_DIRECTION_PIN_NUMBER);
+	}
+
+	public Motor(String port, int powerPinNumber) {
+		super(port);
+		this.POWER_PIN_NUMBER = powerPinNumber;
+		this.POWER_PIN = PWMPin.fromValue((byte) POWER_PIN_NUMBER);
+		this.DIRECTION_PIN_NUMBER = -1;
+		this.DIRECTION_PIN = null;
+		this.COUNTER_DIRECTION_PIN_NUMBER = -1;
+		this.COUNTER_DIRECTION_PIN = null;
 	}
 
 	public void setup() {
-		pinMode(PIN, PinMode.OUTPUT);
+		if (!(DIRECTION_PIN == null) && !(COUNTER_DIRECTION_PIN == null)) {
+			pinMode(DIRECTION_PIN, PinMode.OUTPUT);
+			pinMode(COUNTER_DIRECTION_PIN, PinMode.OUTPUT);
+		}
 	}
 
 	public void loop() {
@@ -37,12 +59,32 @@ public class Motor extends JArduino {
 	@Override
 	public void runArduinoProcess() {
 		super.runArduinoProcess();
-		digitalWrite(PIN, DigitalState.HIGH);
+		analogWrite(POWER_PIN, (byte) 255);
 	}
 	
 	@Override
 	public void stopArduinoProcess() {
-		digitalWrite(PIN, DigitalState.LOW);
+		analogWrite(POWER_PIN, (byte) 0);
 		super.stopArduinoProcess();
+	}
+
+	public void setClockWise() {
+		if (!(DIRECTION_PIN == null) && !(COUNTER_DIRECTION_PIN == null)) {
+			direction = 0;
+			digitalWrite(DIRECTION_PIN, DigitalState.HIGH);
+			digitalWrite(COUNTER_DIRECTION_PIN, DigitalState.LOW);
+		}
+	}
+
+	public void setCounterClockWise() {
+		if (!(DIRECTION_PIN == null) && !(COUNTER_DIRECTION_PIN == null)) {
+			direction = 1;
+			digitalWrite(DIRECTION_PIN, DigitalState.LOW);
+			digitalWrite(COUNTER_DIRECTION_PIN, DigitalState.HIGH);
+		}
+	}
+
+	public int getDirection() {
+		return direction;
 	}
 }
