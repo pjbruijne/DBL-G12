@@ -89,7 +89,7 @@ public class Motor extends JArduino {
 		return direction;
 	}
 
-	void grabDisk() {
+	public void grabDisk() {
         this.setClockWise();
         this.runArduinoProcess();
         delay(3000);
@@ -108,9 +108,6 @@ public class Motor extends JArduino {
             serialPort = Serial4JArduino.selectSerialPort();
         }
 		Motor arm = new Motor(serialPort, 11,2,3);
-		arm.setClockWise();
-		arm.runArduinoProcess();
 		arm.grabDisk();
-		arm.stopArduinoProcess();
 	}
 }
