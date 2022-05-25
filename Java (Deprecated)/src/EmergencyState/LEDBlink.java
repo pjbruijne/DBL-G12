@@ -21,22 +21,24 @@ public class LEDBlink extends JArduino {
         this.PIN = DigitalPin.fromValue((byte) PIN_NUMBER);
     }
 
-    public void setup() {
+    @Override
+    protected void setup() {
         pinMode(PIN, PinMode.OUTPUT);
     }
 
-    public void loop() {
-        try {
+    @Override
+    protected void loop() {
+        //try {
             digitalWrite(PIN, DigitalState.HIGH); 
             delay(BLINK_SPEED);
             digitalWrite(PIN, DigitalState.LOW);
             delay(BLINK_SPEED);
-        } catch (Exception e) {
+        //} catch (Exception e) {
             // TODO: Exception handling
-            System.out.println("Exception occured: " + e.getMessage());
-        } catch (Error e) {
+           // System.out.println("Exception occured: " + e.getMessage());
+       // } catch (Error e) {
             // TODO: Error handling
-        }
+       // }
     }
 
     public static void main(String[] args) {
@@ -46,7 +48,7 @@ public class LEDBlink extends JArduino {
         } else {
             serialPort = Serial4JArduino.selectSerialPort();
         }
-        LEDBlink testBlink = new LEDBlink(serialPort, 13, 5000);
+        LEDBlink testBlink = new LEDBlink(serialPort, 13, 1000);
         testBlink.runArduinoProcess();
     }
 }

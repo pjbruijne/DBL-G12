@@ -89,7 +89,7 @@ public class Motor extends JArduino {
 		return direction;
 	}
 
-	void grabDisk() {
+	public void grabDisk() {
         this.setClockWise();
         this.runArduinoProcess();
         delay(3000);
