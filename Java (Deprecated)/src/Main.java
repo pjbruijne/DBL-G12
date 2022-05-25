@@ -51,7 +51,6 @@ public class Main {
     public void run() {
         try {
             // TODO: main run statements
-            grabDisk(ARM_MOTOR);
 
         } //catch (Error e) {
             // toggleEmergencyState();
@@ -60,7 +59,6 @@ public class Main {
         catch (Exception e) {
             System.out.println(e);
         }
-
     }
 
     /**
