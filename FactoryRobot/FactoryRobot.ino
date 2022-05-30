@@ -9,11 +9,14 @@ boolean slideEnable;
 
 const int armSpeed = 255;
 const int armDelay = 255;
-const int armFreq = 200;
+const int armFreq = 10;
+int armCounter = 0;
 
 const int slideSpeed= 255;
 const int slideDelay = 300;
-const int slideFreq = 200;
+const int slideFreq = 10;
+const int slideWait = 700;
+int slideCounter = 0;
 
 void startup() {
   // turn on motor
@@ -46,15 +49,22 @@ void armMove() {
 
 void slideMove() {
   if (slideEnable) {
-    slide_motor.run(BACKWARD);
-    delay(slideDelay);
-    slide_motor.run(RELEASE);
-    delay(700);
-    slide_motor.run(FORWARD);
-    delay(slideDelay - 7);
-    slide_motor.run(RELEASE);
-    Serial.println("Slide moving!");
-    slideEnable = false;
+    if (slideCounter == 0) {
+      slide_motor.run(BACKWARD);
+    }
+    else if (slideCounter == slideDelay) {
+      slide_motor.run(RELEASE);
+    }
+    else if (slideCounter == slideDelay+slideWait) {
+      slide_motor.run(FORWARD);
+    }
+    else if (slideCounter >= slideDelay*2+slideWait-7) {
+      slide_motor.run(RELEASE);
+      slideEnable = false;
+      slideCounter = 0;
+      return;
+    }
+    slideCounter += 10;    
   }
 }
 
