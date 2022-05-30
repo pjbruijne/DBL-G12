@@ -37,13 +37,22 @@ void startup() {
 
 void armMove() {
   if (armEnable) {
-    arm_motor.run(FORWARD);
-    delay(armDelay);
-    arm_motor.run(BACKWARD);
-    delay(armDelay);
-    arm_motor.run(RELEASE);
-    Serial.println("Arm moving!");
-    armEnable = false;
+    if (armCounter == 0) {
+      arm_motor.run(FORWARD);
+      Serial.println("Arm starts pulling!");
+    }
+    else if (abs(armCounter-armDelay) < armFreq) {
+      arm_motor.run(BACKWARD);
+      Serial.println("Arm starts moving back!");
+    }
+    else if (abs(armCounter-2*armDelay) < armFreq) {
+      Serial.println("Arm has finished!");
+      arm_motor.run(RELEASE);
+      armEnable = false;
+      armCounter = 0;
+      return;
+    }
+    armCounter += armFreq;    
   }
 }
 
@@ -52,10 +61,10 @@ void slideMove() {
     if (slideCounter == 0) {
       slide_motor.run(BACKWARD);
     }
-    else if (slideCounter == slideDelay) {
+    else if (abs(slideCounter-slideDelay) < slideFreq) {
       slide_motor.run(RELEASE);
     }
-    else if (slideCounter == slideDelay+slideWait) {
+    else if (abs(slideCounter-(slideDelay+slideWait)) < slideFreq) {
       slide_motor.run(FORWARD);
     }
     else if (slideCounter >= slideDelay*2+slideWait-7) {
@@ -64,7 +73,7 @@ void slideMove() {
       slideCounter = 0;
       return;
     }
-    slideCounter += 10;    
+    slideCounter += slideFreq;    
   }
 }
 
