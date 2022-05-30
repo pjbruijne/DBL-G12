@@ -9,14 +9,15 @@ boolean slideEnable;
 
 const int armSpeed = 255;
 const int armDelay = 255;
-const int armFreq = 10;
-int armCounter = 0;
+const int armFreq = 1;
+int armStartMillis = 0;
 
 const int slideSpeed= 255;
 const int slideDelay = 300;
-const int slideFreq = 10;
+const int slideFreq = 1;
 const int slideWait = 700;
-int slideCounter = 0;
+int slideStartMillis = 0;
+
 
 void startup() {
   // turn on motor
@@ -37,43 +38,43 @@ void startup() {
 
 void armMove() {
   if (armEnable) {
-    if (armCounter == 0) {
+    if (armStartMillis == 0) {
+      armStartMillis = millis();
       arm_motor.run(FORWARD);
       Serial.println("Arm starts pulling!");
     }
-    else if (abs(armCounter-armDelay) < armFreq) {
+    else if (millis()-armStartMillis == armDelay) {
       arm_motor.run(BACKWARD);
       Serial.println("Arm starts moving back!");
     }
-    else if (abs(armCounter-2*armDelay) < armFreq) {
+    else if (millis()-armStartMillis >= 2*armDelay) {
       Serial.println("Arm has finished!");
       arm_motor.run(RELEASE);
       armEnable = false;
-      armCounter = 0;
+      armStartMillis = 0;
       return;
-    }
-    armCounter += armFreq;    
+    }   
   }
 }
 
 void slideMove() {
   if (slideEnable) {
-    if (slideCounter == 0) {
+    if (slideStartMillis == 0) {
+      slideStartMillis = millis();
       slide_motor.run(BACKWARD);
     }
-    else if (abs(slideCounter-slideDelay) < slideFreq) {
+    else if (millis()-slideStartMillis == slideDelay) {
       slide_motor.run(RELEASE);
     }
-    else if (abs(slideCounter-(slideDelay+slideWait)) < slideFreq) {
+    else if (millis()-slideStartMillis == slideDelay+slideWait) {
       slide_motor.run(FORWARD);
     }
-    else if (slideCounter >= slideDelay*2+slideWait-7) {
+    else if (millis() - slideStartMillis >= slideDelay*2+slideWait-7) {
       slide_motor.run(RELEASE);
       slideEnable = false;
-      slideCounter = 0;
+      slideStartMillis = 0;
       return;
     }
-    slideCounter += slideFreq;    
   }
 }
 
