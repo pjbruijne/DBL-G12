@@ -1,4 +1,5 @@
 #include "src/AFMotor/AFMotor.h"
+#include "src/TimedAction/TimedAction.h"
 
 AF_DCMotor arm_motor(2);
 AF_DCMotor slide_motor(1);
