@@ -1,15 +1,19 @@
 #include "src/AFMotor/AFMotor.h"
 #include "src/TimedAction/TimedAction.h"
 
-AF_DCMotor arm_motor(2);
-AF_DCMotor slide_motor(1);
+AF_DCMotor arm_motor(1);
+AF_DCMotor slide_motor(2);
+
 boolean armEnable;
 boolean slideEnable;
+
 const int armSpeed = 255;
 const int armDelay = 255;
-const int armFreq = 500;
+const int armFreq = 200;
+
 const int slideSpeed= 255;
 const int slideDelay = 300;
+const int slideFreq = 200;
 
 void startup() {
   // turn on motor
@@ -19,7 +23,8 @@ void startup() {
   // turn on motor
   slide_motor.setSpeed(slideSpeed);
   slide_motor.run(RELEASE);
-  
+
+  // Arm setup
   arm_motor.run(FORWARD);
   delay(750);
   arm_motor.run(BACKWARD);
@@ -70,11 +75,7 @@ void setup() {
 void loop() {
   armThread.check();
   slideThread.check();
-  if(armEnable) {
-    slideMove();
-    armEnable = false;
-  }
-
   delay(1000);
   armEnable = true;
+  slideEnable = true;
 }
