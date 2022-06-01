@@ -1,5 +1,6 @@
 #include "src/AFMotor/AFMotor.h"
 #include "src/TimedAction/TimedAction.h"
+#include "src/Adafruit_TCS34725/Adafruit_TCS34725.h"
 
 AF_DCMotor arm_motor(1);
 AF_DCMotor slide_motor(2);
