@@ -39,7 +39,7 @@
 #include <WProgram.h>
 #endif
 
-#include <Adafruit_I2CDevice.h>
+#include "../Adafruit_BusIO/Adafruit_I2CDevice.h"
 
 #define TCS34725_ADDRESS (0x29)     /**< I2C address **/
 #define TCS34725_COMMAND_BIT (0x80) /**< Command bit **/
