@@ -11,7 +11,7 @@ int armDir;
 int slideDir;
 
 const int armSpeed = 255;
-const unsigned long armDelay = 255;
+const unsigned long armDelay = 220;
 const int armFreq = 1;
 unsigned long armStartMillis = 0;
 
@@ -38,6 +38,13 @@ void startup() {
   arm_motor.run(BACKWARD);
   delay(armDelay);
   arm_motor.run(RELEASE);
+
+  // Slide setup
+  slide_motor.run(BACKWARD);
+  delay(750);
+  slide_motor.run(FORWARD);
+  delay(100);
+  slide_motor.run(RELEASE);
 }
 
 void armMove() {
@@ -77,8 +84,9 @@ void slideMove() {
     unsigned long m = millis(); //take time value since start of machine
     if (slideStartMillis == 0) {  // if the global start millis variable equals zero, the method is just starting
       slideStartMillis = m; // set new value for start millis
-      slide_motor.run(BACKWARD);  // make the motor run backward
+      slide_motor.run(FORWARD);  // make the motor run backward
       slideDir = -1;  // set direction to -1 (backward)
+      Serial.println("Slide started");
       return;
     }
     else if (m-slideStartMillis >= slideDelay) {  // if time is past first checkpoint
@@ -87,17 +95,20 @@ void slideMove() {
           slide_motor.run(RELEASE); // stop motor
           slideEnable = false;  // set function execution to false
           slideStartMillis = 0; // reset start millis value
+          Serial.println("Slide checkpoint 4");
           return; // stop the function
         }
         else if (slideDir == 0) {  // if past second checkpoint, not the third yet and not moving
-          slide_motor.run(FORWARD); // run forward
+          slide_motor.run(BACKWARD); // run forward
           slideDir = 1; // set direction to 1 (forward)
+          Serial.println("Slide checkpoint 3");
           return;
         }
       }
       else if (slideDir == -1) {  // if past first checkpoint but not yet the second and also moving backward
         slide_motor.run(RELEASE); // stop movement
         slideDir = 0;  // set direction variable to 0
+        Serial.println("Slide checkpoint 2");
         return;
       }
     }
