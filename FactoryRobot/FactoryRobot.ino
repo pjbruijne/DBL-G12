@@ -22,7 +22,8 @@ const int slideFreq = 1;
 const unsigned long slideWait = 700;
 unsigned long slideStartMillis = 0;
 
-int millisError = 100;
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+int acceptance = 70;
 
 void startup() {
   // turn on motor
@@ -115,6 +116,25 @@ void slideMove() {
     }
     
   }
+}
+
+int getColor(float r, float g, float b) {
+  float black[] = {0,0,0};
+  float green[] = {0,255,0};
+  float white[] = {255,255,255};
+  float blackDist = sqrt(sq(black[0]-r)+sq(black[1]-g)+sq(black[2]-b));
+  float greenDist = sqrt(sq(green[0]-r)+sq(green[1]-g)+sq(green[2]-b));
+  float whiteDist = sq(sq(white[0]-r)+sq(white[1]-g)+sq(white[2]-b));
+  if (whiteDist < acceptance) {
+    return 0;
+  }
+  else if (blackDist < acceptance) {
+    return 1;
+  }
+  else if (greenDist < acceptance) {
+    return 2;
+  }
+  else return -1;
 }
 
 TimedAction armThread = TimedAction(armFreq,armMove);
