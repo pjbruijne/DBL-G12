@@ -56,7 +56,7 @@ void armMove() {
       armStartMillis = (unsigned long) 0;
       return;
     }   
-    else {
+    else if(arm_motor.) {
       arm_motor.run(BACKWARD);
       Serial.println("Arm starts moving back!");
     }
@@ -65,22 +65,26 @@ void armMove() {
 
 void slideMove() {
   if (slideEnable) {
+    unsigned long m = millis();
     if (slideStartMillis == 0) {
-      slideStartMillis = millis();
+      slideStartMillis = m;
       slide_motor.run(BACKWARD);
     }
-    else if (millis()-slideStartMillis == slideDelay) {
-      slide_motor.run(RELEASE);
-    }
-    else if (millis()-slideStartMillis == slideDelay+slideWait) {
+    else if (m-slideStartMillis >= slideDelay) {
+      if (millis()-slideStartMillis == slideDelay+slideWait) {
       slide_motor.run(FORWARD);
+      }
+      else if (millis() - slideStartMillis >= slideDelay*2+slideWait-7) {
+        slide_motor.run(RELEASE);
+        slideEnable = false;
+        slideStartMillis = 0;
+        return;
+      }
+      else {
+        slide_motor.run(RELEASE);
+      }
     }
-    else if (millis() - slideStartMillis >= slideDelay*2+slideWait-7) {
-      slide_motor.run(RELEASE);
-      slideEnable = false;
-      slideStartMillis = 0;
-      return;
-    }
+    
   }
 }
 
