@@ -7,8 +7,8 @@ AF_DCMotor slide_motor(2);
 boolean armEnable;
 boolean slideEnable;
 
-boolean armDir;
-boolean slideDir;
+int armDir;
+int slideDir;
 
 const int armSpeed = 255;
 const unsigned long armDelay = 255;
@@ -48,53 +48,57 @@ void armMove() {
       Serial.println(m);
       arm_motor.run(FORWARD);
       Serial.println("Arm starts pulling!");
-      armDir = true;
-    }
-    else if (m-armStartMillis < armDelay) {
-      
-    }
-    else if (m-armStartMillis >= 2*armDelay) {
-      Serial.println("Arm has finished!");
-      arm_motor.run(RELEASE);
-      armEnable = false;
-      armStartMillis = (unsigned long) 0;
+      armDir = 1;
       return;
-    }   
-<<<<<<< HEAD
-    else if(arm_motor.) {
-      arm_motor.run(BACKWARD);
-      Serial.println("Arm starts moving back!");
-=======
-    else {
-      if(armDir) {
-        arm_motor.run(BACKWARD);
-        Serial.println("Arm starts moving back!");
-        armDir = false;
+    }
+    else if (m-armStartMillis >= armDelay) {
+      if (m-armStartMillis >= 2*armDelay) {
+        Serial.println("Arm has finished!");
+        arm_motor.run(RELEASE);
+        armEnable = false;
+        armStartMillis = (unsigned long) 0;
+        return;
       }
->>>>>>> 9d9fdaf9cb2c866d62f328de19b7dca0e8ae228b
+      else if(armDir == 1) {
+          arm_motor.run(BACKWARD);
+          Serial.println("Arm starts moving back!");
+          armDir = -1;
+          return;
+      }
     }
   }
 }
 
+/**
+ * Our method for moving the slide. Since it is in a TimedAction, it will constantly be fired. Therefore we first always check whether the slide is supposed to move.
+ */
 void slideMove() {
-  if (slideEnable) {
-    unsigned long m = millis();
-    if (slideStartMillis == 0) {
-      slideStartMillis = m;
-      slide_motor.run(BACKWARD);
+  if (slideEnable) {  // if the slide is supposed to move
+    unsigned long m = millis(); //take time value since start of machine
+    if (slideStartMillis == 0) {  // if the global start millis variable equals zero, the method is just starting
+      slideStartMillis = m; // set new value for start millis
+      slide_motor.run(BACKWARD);  // make the motor run backward
+      slideDir = -1;  // set direction to -1 (backward)
+      return;
     }
-    else if (m-slideStartMillis >= slideDelay) {
-      if (millis()-slideStartMillis == slideDelay+slideWait) {
-      slide_motor.run(FORWARD);
+    else if (m-slideStartMillis >= slideDelay) {  // if time is past first checkpoint
+      if (m-slideStartMillis >= slideDelay+slideWait) { // if time is past second checkpoint
+        if (millis() - slideStartMillis >= slideDelay*2+slideWait-7) {  //if time is past third checkpoint
+          slide_motor.run(RELEASE); // stop motor
+          slideEnable = false;  // set function execution to false
+          slideStartMillis = 0; // reset start millis value
+          return; // stop the function
+        }
+        else if (slideDir == 0) {  // if past second checkpoint, not the third yet and not moving
+          slide_motor.run(FORWARD); // run forward
+          slideDir = 1; // set direction to 1 (forward)
+          return;
+        }
       }
-      else if (millis() - slideStartMillis >= slideDelay*2+slideWait-7) {
-        slide_motor.run(RELEASE);
-        slideEnable = false;
-        slideStartMillis = 0;
+      else if (slideDir == -1) {  // if past first checkpoint but not yet the second and also moving backward
+        slide_motor.run(RELEASE); // stop movement
+        slideDir = 0;  // set direction variable to 0
         return;
-      }
-      else {
-        slide_motor.run(RELEASE);
       }
     }
     
