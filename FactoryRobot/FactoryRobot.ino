@@ -7,6 +7,9 @@ AF_DCMotor slide_motor(2);
 boolean armEnable;
 boolean slideEnable;
 
+boolean armDir;
+boolean slideDir;
+
 const int armSpeed = 255;
 const unsigned long armDelay = 255;
 const int armFreq = 1;
@@ -45,6 +48,7 @@ void armMove() {
       Serial.println(m);
       arm_motor.run(FORWARD);
       Serial.println("Arm starts pulling!");
+      armDir = true;
     }
     else if (m-armStartMillis < armDelay) {
       
@@ -57,8 +61,11 @@ void armMove() {
       return;
     }   
     else {
-      arm_motor.run(BACKWARD);
-      Serial.println("Arm starts moving back!");
+      if(armDir) {
+        arm_motor.run(BACKWARD);
+        Serial.println("Arm starts moving back!");
+        armDir = false;
+      }
     }
   }
 }
@@ -101,9 +108,13 @@ void setup() {
 void loop() {
   armThread.check();
   slideThread.check();
-  armEnable = true;
-  slideEnable = true;
+  if(millis() % 1000 == 0) {
+    armEnable = true;
+    slideEnable = true;
+  }
   if (millis()>10000) {
+    arm_motor.run(RELEASE);
+    slide_motor.run(RELEASE);
     exit(0);
   }
 }
