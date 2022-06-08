@@ -184,8 +184,10 @@ void setup() {
  * The loop method. Constantly refired and mostly used for checking the protothreads and the rgb values of the sensor.
  */
 void loop() {
-
   uint16_t r, g, b, c, colorTemp, lux;
+  
+  armThread.check();  // check if the armThread has to be refired yet
+  slideThread.check();  // check if the slideThread has to be refired yet
 
   tcs.getRawData(&r, &g, &b, &c);
   colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c);
@@ -200,14 +202,17 @@ void loop() {
   Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
   Serial.print("C: "); Serial.print(c, DEC); Serial.print(" : ");
   Serial.println(color);
-  
-  armThread.check();  // check if the armThread has to be refired yet
-  slideThread.check();  // check if the slideThread has to be refired yet
-  if(millis() % 1000 == 0) {  // for testing purposes
+
+
+  if(color == 2) {
     armEnable = true;
     slideEnable = true;
+  } else if(color == 1) {
+    armEnable = true;
   }
-  if (millis()>10000) { // early exit call for testing purposes
+  
+  
+  if (millis()>25000) { // early exit call for testing purposes
     arm_motor.run(RELEASE);
     slide_motor.run(RELEASE);
     exit(0);
