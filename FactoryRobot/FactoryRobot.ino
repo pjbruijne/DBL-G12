@@ -29,7 +29,6 @@ int acceptance = 70;                                                            
  * Our method fired to start the motors. We set different variables for the motors and put them in the correct positions.
  */
 void startup() {
-  
   // turn on motor 1 (arm motor)
   arm_motor.setSpeed(armSpeed); // set the speed to armSpeed
   arm_motor.run(RELEASE); // no movement yet
@@ -131,18 +130,23 @@ void slideMove() {
 /**
  * Our method for getting the disk color based on the rgb values provided by the sensor.
  */
-int getColor(float r, float g, float b) {
-  float black[] = {0,0,0};  // the rgb values of pure black
-  float green[] = {0,255,0};  // the rgb values of pure green
-  float white[] = {255,255,255};  // the rgb values of pure white
-  float blackDist = sqrt(sq(black[0]-r)+sq(black[1]-g)+sq(black[2]-b)); // the euclidean distance between the sensor rgb and black
-  float greenDist = sqrt(sq(green[0]-r)+sq(green[1]-g)+sq(green[2]-b)); // the euclidean distance between the sensor rgb and green
-  float whiteDist = sq(sq(white[0]-r)+sq(white[1]-g)+sq(white[2]-b));   // the euclidean distance between the sensor rgb and white
-  if (whiteDist < acceptance) { // if the distance to white is smaller than the acceptance variable
-    return 0; // disk is white
+int getColor(uint16_t r, uint16_t g, uint16_t b, uint16_t lux) {
+  uint16_t black[] = {0,0,0,0};  // the rgb values of pure black
+  uint16_t green[] = {0,255,0,0};  // the rgb values of pure green
+  uint16_t white[] = {255,255,255,0};  // the rgb values of pure white
+  uint16_t belt[] = {b1,b2,b3,0}; // the rgb values of the belt
+  float blackDist = sqrt(sq((((float)black[0])-((float)r))+sq(((float)black[1])-((float)g))+sq(((float)black[2])-((float)b))+sq(((float)black[3])-((float)lux))); // the euclidean distance between the sensor rgb and black
+  float greenDist = sqrt(sq((((float)green[0])-((float)r))+sq(((float)green[1])-((float)g))+sq(((float)green[2])-((float)b))+sq(((float)green[3])-((float)lux))); // the euclidean distance between the sensor rgb and green
+  float whiteDist = sqrt(sq((((float)white[0])-((float)r))+sq(((float)white[1])-((float)g))+sq(((float)white[2])-((float)b))+sq(((float)white[3])-((float)lux))); // the euclidean distance between the sensor rgb and white
+  float beltDist = sqrt(sq((((float)belt[0])-((float)r))+sq(((float)belt[1])-((float)g))+sq(((float)belt[2])-((float)b))+sq(((float)belt[3])-((float)lux)));      // the euclidean distance between the sensor rgb and belt
+  if (beltDist < acceptance) { // if the distance to belt is smaller than the acceptance variable
+    return 0; // no disk is present
+  }
+  else if (whiteDist < acceptance) {  // if the distance to white is smaller than the acceptance variable
+    return 1; // disk is white
   }
   else if (blackDist < acceptance) {  // if the distance to black is smaller than the acceptance variable
-    return 1; // disk is black
+    return 2; // disk is black
   }
   else if (greenDist < acceptance) {  // if the distance to green is smaller than the acceptance variable
     return 2; // disk is green
@@ -160,17 +164,10 @@ void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
   Serial.println("Setup!");
 
-  // Check if the sensor is connected properly
-  if (tcs.begin()) {
-    Serial.println("Found sensor");
-  } else {
-    Serial.println("No sensor found ... check your connections");
-    while (1);
-  }
-
   armEnable = true;
   slideEnable = true;
   startup();
+  tcs.begin();
   Serial.println("startup complete!");
   delay(1000);
 }
@@ -179,20 +176,6 @@ void setup() {
  * The loop method. Constantly refired and mostly used for checking the protothreads and the rgb values of the sensor.
  */
 void loop() {
-
-  uint16_t r, g, b, c, colorTemp, lux;
-  tcs.getRawData(&r, &g, &b, &c);
-  colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c);
-  lux = tcs.calculateLux(r, g, b);
-  
-  int color = getColor((float) r / 257, (float) g / 257, (float) b / 257);
-  Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
-  Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
-  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-  Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
-  Serial.print("C: "); Serial.print(c, DEC); Serial.print(" : ");
-  Serial.println(color);
   armThread.check();  // check if the armThread has to be refired yet
   slideThread.check();  // check if the slideThread has to be refired yet
   if(millis() % 1000 == 0) {  // for testing purposes
