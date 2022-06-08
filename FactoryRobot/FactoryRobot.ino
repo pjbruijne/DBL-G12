@@ -139,19 +139,20 @@ int getColor(uint16_t r, uint16_t g, uint16_t b, uint16_t lux) {
   float greenDist = sqrt(sq(((float)green[0])-((float)r))+sq(((float)green[1])-((float)g))+sq(((float)green[2])-((float)b))+sq(((float)green[3])-((float)lux))); // the euclidean distance between the sensor rgb and green
   float whiteDist = sqrt(sq(((float)white[0])-((float)r))+sq(((float)white[1])-((float)g))+sq(((float)white[2])-((float)b))+sq(((float)white[3])-((float)lux))); // the euclidean distance between the sensor rgb and white
   float beltDist = sqrt(sq(((float)belt[0])-((float)r))+sq(((float)belt[1])-((float)g))+sq(((float)belt[2])-((float)b))+sq(((float)belt[3])-((float)lux)));      // the euclidean distance between the sensor rgb and belt
-  if (beltDist < acceptance) { // if the distance to belt is smaller than the acceptance variable
-    return 0; // no disk is present
+  float minDist = min(min(beltDist,blackDist),min(greenDist,whiteDist));
+  if (minDist < acceptance) { // if there is a distance smaller than the acceptance variable
+    if (whiteDist == minDist) {  // if white has smallest distance to raw data
+      return 1; // disk is white
+    }
+    else if (blackDist == minDist) {  // if black has smallest distance to raw data 
+      return 2; // disk is black
+    }
+    else if (greenDist == minDist) {  // if green has smallest distance to raw data
+      return 3; // disk is green
+    }
+    else return 0;  // else belt has smallest distance to raw data by process of elimination, no disk present
   }
-  else if (whiteDist < acceptance) {  // if the distance to white is smaller than the acceptance variable
-    return 1; // disk is white
-  }
-  else if (blackDist < acceptance) {  // if the distance to black is smaller than the acceptance variable
-    return 2; // disk is black
-  }
-  else if (greenDist < acceptance) {  // if the distance to green is smaller than the acceptance variable
-    return 3; // disk is green
-  }
-  else return -1; // if neither of the above, return -1 meaning something wrong is on the belt
+  else return -1; // if smallest distance is not smaller than acceptance, return -1 meaning something wrong is on the belt
 }
 
 TimedAction armThread = TimedAction(armFreq,armMove);       // TimedAction of the armMove function for protothreading
