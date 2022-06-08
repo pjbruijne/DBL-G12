@@ -128,17 +128,35 @@ void slideMove() {
 }
 
 /**
+ * Distance calculated using the p-norm. Used by our function below to calculate the distance between the raw data and the preset colors.
+ */
+float pNormDistance(uint16_t vector1[], uint16_t vector2[], int p) {
+  float x = 0;
+  int len1 = sizeof(vector1)/sizeof(vector1[0]);
+  int len2 = sizeof(vector2)/sizeof(vector2[0]);
+  if (len1 != len2) {
+    return -1;
+  }
+  for (int i = 0; i < len1; i++) {
+    x+= pow(abs(((float)vector1[i])-((float)vector2[i])),p);
+  }
+  return pow(x,1/p);
+}
+
+/**
  * Our method for getting the disk color based on the rgb values provided by the sensor.
  */
-int getColor(uint16_t r, uint16_t g, uint16_t b, uint16_t lux) {
-  uint16_t black[] = {115,120,100,80};  // the rgb values of pure black 2
-  uint16_t green[] = {310,600,350,500};  // the rgb values of pure green 3
-  uint16_t white[] = {1300,1750,1620,1000};  // the rgb values of pure white 1
-  uint16_t belt[] = {0,52,33,0}; // the rgb values of the belt 0
-  float blackDist = sqrt(sq(((float)black[0])-((float)r))+sq(((float)black[1])-((float)g))+sq(((float)black[2])-((float)b))+sq(((float)black[3])-((float)lux))); // the euclidean distance between the sensor rgb and black
-  float greenDist = sqrt(sq(((float)green[0])-((float)r))+sq(((float)green[1])-((float)g))+sq(((float)green[2])-((float)b))+sq(((float)green[3])-((float)lux))); // the euclidean distance between the sensor rgb and green
-  float whiteDist = sqrt(sq(((float)white[0])-((float)r))+sq(((float)white[1])-((float)g))+sq(((float)white[2])-((float)b))+sq(((float)white[3])-((float)lux))); // the euclidean distance between the sensor rgb and white
-  float beltDist = sqrt(sq(((float)belt[0])-((float)r))+sq(((float)belt[1])-((float)g))+sq(((float)belt[2])-((float)b))+sq(((float)belt[3])-((float)lux)));      // the euclidean distance between the sensor rgb and belt
+int getColor(uint16_t r, uint16_t g, uint16_t b, uint16_t c, uint16_t lux) {
+  int p = 2;  // we use euclidean distance, but we could easily switch to manhattan or other set distances
+  uint16_t rawData[] = {r,g,b,c,lux}; // the rgb c and lux values of input in an array
+  uint16_t black[] = {115,120,100,0,80};  // the values of black 2
+  uint16_t green[] = {310,600,350,0,500};  // the values of green 3
+  uint16_t white[] = {1300,1750,1620,0,1000};  // the values of white 1
+  uint16_t belt[] = {0,52,33,0,0}; // the values of the belt 0
+  float blackDist = pNormDistance(rawData,black,p); // the euclidean distance between the sensor rgb and black
+  float greenDist = pNormDistance(rawData,green,p); // the euclidean distance between the sensor rgb and green
+  float whiteDist = pNormDistance(rawData,white,p); // the euclidean distance between the sensor rgb and white
+  float beltDist = pNormDistance(rawData,belt,p);  // the euclidean distance between the sensor rgb and belt
   float minDist = min(min(beltDist,blackDist),min(greenDist,whiteDist));
   if (minDist < acceptance) { // if there is a distance smaller than the acceptance variable
     if (whiteDist == minDist) {  // if white has smallest distance to raw data
@@ -191,7 +209,7 @@ void loop() {
   colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c);
   lux = tcs.calculateLux(r, g, b);
 
-  int color = getColor(r, g, b, lux);
+  int color = getColor(r, g, b, c, lux);
 
   Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
   Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
