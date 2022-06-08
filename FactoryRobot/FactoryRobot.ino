@@ -23,7 +23,7 @@ unsigned long slideStartMillis = 0;   // the starting time of the slideMove proc
 const int slideFreq = 1;              // the wait time in milliseconds before the TimedAction should try to refire the slideMove method
 
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X); // the sensor variable
-int acceptance = 70;                                                                        // the euclidean distance acceptance variable (distance < acceptance)
+int acceptance = 150;                                                                        // the euclidean distance acceptance variable (distance < acceptance)
 
 /**
  * Our method fired to start the motors. We set different variables for the motors and put them in the correct positions.
@@ -131,14 +131,14 @@ void slideMove() {
  * Our method for getting the disk color based on the rgb values provided by the sensor.
  */
 int getColor(uint16_t r, uint16_t g, uint16_t b, uint16_t lux) {
-  uint16_t black[] = {0,0,0,0};  // the rgb values of pure black
-  uint16_t green[] = {0,255,0,0};  // the rgb values of pure green
-  uint16_t white[] = {255,255,255,0};  // the rgb values of pure white
-  uint16_t belt[] = {b1,b2,b3,0}; // the rgb values of the belt
-  float blackDist = sqrt(sq((((float)black[0])-((float)r))+sq(((float)black[1])-((float)g))+sq(((float)black[2])-((float)b))+sq(((float)black[3])-((float)lux))); // the euclidean distance between the sensor rgb and black
-  float greenDist = sqrt(sq((((float)green[0])-((float)r))+sq(((float)green[1])-((float)g))+sq(((float)green[2])-((float)b))+sq(((float)green[3])-((float)lux))); // the euclidean distance between the sensor rgb and green
-  float whiteDist = sqrt(sq((((float)white[0])-((float)r))+sq(((float)white[1])-((float)g))+sq(((float)white[2])-((float)b))+sq(((float)white[3])-((float)lux))); // the euclidean distance between the sensor rgb and white
-  float beltDist = sqrt(sq((((float)belt[0])-((float)r))+sq(((float)belt[1])-((float)g))+sq(((float)belt[2])-((float)b))+sq(((float)belt[3])-((float)lux)));      // the euclidean distance between the sensor rgb and belt
+  uint16_t black[] = {115,120,100,80};  // the rgb values of pure black 2
+  uint16_t green[] = {310,600,350,500};  // the rgb values of pure green 3
+  uint16_t white[] = {1300,1750,1620,1000};  // the rgb values of pure white 1
+  uint16_t belt[] = {0,52,33,0}; // the rgb values of the belt 0
+  float blackDist = sqrt(sq(((float)black[0])-((float)r))+sq(((float)black[1])-((float)g))+sq(((float)black[2])-((float)b))+sq(((float)black[3])-((float)lux))); // the euclidean distance between the sensor rgb and black
+  float greenDist = sqrt(sq(((float)green[0])-((float)r))+sq(((float)green[1])-((float)g))+sq(((float)green[2])-((float)b))+sq(((float)green[3])-((float)lux))); // the euclidean distance between the sensor rgb and green
+  float whiteDist = sqrt(sq(((float)white[0])-((float)r))+sq(((float)white[1])-((float)g))+sq(((float)white[2])-((float)b))+sq(((float)white[3])-((float)lux))); // the euclidean distance between the sensor rgb and white
+  float beltDist = sqrt(sq(((float)belt[0])-((float)r))+sq(((float)belt[1])-((float)g))+sq(((float)belt[2])-((float)b))+sq(((float)belt[3])-((float)lux)));      // the euclidean distance between the sensor rgb and belt
   if (beltDist < acceptance) { // if the distance to belt is smaller than the acceptance variable
     return 0; // no disk is present
   }
@@ -149,7 +149,7 @@ int getColor(uint16_t r, uint16_t g, uint16_t b, uint16_t lux) {
     return 2; // disk is black
   }
   else if (greenDist < acceptance) {  // if the distance to green is smaller than the acceptance variable
-    return 2; // disk is green
+    return 3; // disk is green
   }
   else return -1; // if neither of the above, return -1 meaning something wrong is on the belt
 }
@@ -164,6 +164,13 @@ void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
   Serial.println("Setup!");
 
+  if (tcs.begin()) {
+    Serial.println("Found sensor");
+  } else {
+    Serial.println("No TCS34725 found ... check your connections");
+    while (1);
+  }
+
   armEnable = true;
   slideEnable = true;
   startup();
@@ -176,6 +183,23 @@ void setup() {
  * The loop method. Constantly refired and mostly used for checking the protothreads and the rgb values of the sensor.
  */
 void loop() {
+
+  uint16_t r, g, b, c, colorTemp, lux;
+
+  tcs.getRawData(&r, &g, &b, &c);
+  colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c);
+  lux = tcs.calculateLux(r, g, b);
+
+  int color = getColor(r, g, b, lux);
+
+  Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
+  Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
+  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
+  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
+  Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
+  Serial.print("C: "); Serial.print(c, DEC); Serial.print(" : ");
+  Serial.println(color);
+  
   armThread.check();  // check if the armThread has to be refired yet
   slideThread.check();  // check if the slideThread has to be refired yet
   if(millis() % 1000 == 0) {  // for testing purposes
