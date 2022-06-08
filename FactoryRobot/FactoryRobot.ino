@@ -29,6 +29,7 @@ int acceptance = 70;                                                            
  * Our method fired to start the motors. We set different variables for the motors and put them in the correct positions.
  */
 void startup() {
+  
   // turn on motor 1 (arm motor)
   arm_motor.setSpeed(armSpeed); // set the speed to armSpeed
   arm_motor.run(RELEASE); // no movement yet
@@ -159,6 +160,14 @@ void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
   Serial.println("Setup!");
 
+  // Check if the sensor is connected properly
+  if (tcs.begin()) {
+    Serial.println("Found sensor");
+  } else {
+    Serial.println("No sensor found ... check your connections");
+    while (1);
+  }
+
   armEnable = true;
   slideEnable = true;
   startup();
@@ -170,6 +179,20 @@ void setup() {
  * The loop method. Constantly refired and mostly used for checking the protothreads and the rgb values of the sensor.
  */
 void loop() {
+
+  uint16_t r, g, b, c, colorTemp, lux;
+  tcs.getRawData(&r, &g, &b, &c);
+  colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c);
+  lux = tcs.calculateLux(r, g, b);
+  
+  int color = getColor((float) r / 257, (float) g / 257, (float) b / 257);
+  Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
+  Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
+  Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
+  Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
+  Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
+  Serial.print("C: "); Serial.print(c, DEC); Serial.print(" : ");
+  Serial.println(color);
   armThread.check();  // check if the armThread has to be refired yet
   slideThread.check();  // check if the slideThread has to be refired yet
   if(millis() % 1000 == 0) {  // for testing purposes
