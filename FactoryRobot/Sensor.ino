@@ -41,8 +41,8 @@ int getColor(uint16_t r, uint16_t g, uint16_t b) {
   uint16_t rawData[] = {r,g,b}; // the rgb of input in an array
   uint16_t black[] = {85,85,70};  // the values of black 2
   uint16_t green[] = {230,370,215};  // the values of green 3
-  uint16_t white[] = {850,1040,980};  // the values of white 1
-  uint16_t belt[] = {75,77,60}; // the values of the belt 0
+  uint16_t white[] = {740,900,850};  // the values of white 1
+  uint16_t belt[] = {60,60,45}; // the values of the belt 0
   float blackDist = pNormDistance(rawData,black,3,p); // the euclidean distance between the sensor rgb and black
   float greenDist = pNormDistance(rawData,green,3,p); // the euclidean distance between the sensor rgb and green
   float whiteDist = pNormDistance(rawData,white,3,p); // the euclidean distance between the sensor rgb and white

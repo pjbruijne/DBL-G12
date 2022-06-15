@@ -1,10 +1,25 @@
 #include "src/AFMotor/AFMotor.h"
 #include "src/TimedAction/TimedAction.h"
 #include "src/Adafruit_TCS34725/Adafruit_TCS34725.h"
+#include "src/DHT/dht.h"
+
+#define WATER_PIN  3
+#define TEMP_PIN 2
+
+#define SIGNAL_WATER_PIN A1
+#define SIGNAL_TEMP_PIN A0
 
 // initialization of the motors
 AF_DCMotor arm_motor(1);    // motor 1 is assigned to the arm
 AF_DCMotor slide_motor(2);  // motor 2 is assigned to the slide
+
+// initialization of the temperatur / humidity sensor
+dht DHT;
+
+// Sensor error codes
+int waterError = 5;
+float tempError = 70.0;
+float humidityError = 95.0;
 
 // booleans for the motors
 boolean armEnable;    // global boolean for whether the arm should move
@@ -32,8 +47,41 @@ Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS3472
 int acceptance = 100;// the euclidean distance acceptance variable (distance < acceptance)
 
 int checkInterval = 1100; // interval which the sensor checks in miliseconds
-int sensorDetectDelay = 600; // delay between sensing the disk and moving the arm / slide
+int sensorDetectDelay = 800; // delay between sensing the disk and moving the arm / slide
 int errorCounter = 0;
+
+/**
+ * Our method for checking the value of the water sensor
+ */
+int waterCheck() {
+  int value;
+  digitalWrite(WATER_PIN, HIGH);        // turn the sensor ON
+  delay(10);                            // wait 10 milliseconds
+  value = analogRead(SIGNAL_WATER_PIN); // read the analog value from sensor
+  digitalWrite(WATER_PIN, LOW);         // turn the sensor OFF
+  return value;
+}
+
+/**
+ * Our own shutdown method to shutdown the robot
+ */
+void shutDown(int code) {
+  arm_motor.run(RELEASE);
+  slide_motor.run(RELEASE);
+  digitalWrite(WATER_PIN, LOW);
+  digitalWrite(TEMP_PIN, LOW);
+  exit(code);
+}
+
+/**
+ * Method to print color data to serial
+ */
+void printColor(uint16_t r, uint16_t g, uint16_t b) {
+  Serial.print("Color Data:  ");
+  Serial.print("R: "); Serial.print(r); Serial.print(", ");
+  Serial.print("G: "); Serial.print(g); Serial.print(", ");
+  Serial.print("B: "); Serial.print(b); Serial.println();
+}
 
 /**
  * Our method for moving the arm. Since it is protothreaded, we constantly fire it and first check whether the arm should move.
@@ -126,10 +174,17 @@ void setup() {
     //while (1);
   }
 
-  armEnable = true;
-  slideEnable = true;
+  armEnable = false;
+  slideEnable = false;
   startup();
   tcs.begin();
+
+  pinMode(WATER_PIN, OUTPUT); // config the pin as output
+  digitalWrite(WATER_PIN, LOW);
+
+  pinMode(TEMP_PIN, OUTPUT);
+  digitalWrite(TEMP_PIN, HIGH);
+  
   Serial.println("startup complete!");
   delay(1000);
 }
@@ -140,24 +195,39 @@ void setup() {
 void loop() {
   uint16_t r, g, b, c, colorTemp, lux;
   int color;
-  
+    
   armThread.check();  // check if the armThread has to be refired yet
   slideThread.check();  // check if the slideThread has to be refired yet
 
   if(millis() % checkInterval == 0) {
+
+    // Temp and Humidity sensor
+    DHT.read11(SIGNAL_TEMP_PIN);
+    
+    int waterValue = waterCheck();
+    
+    if(waterValue > waterError) {
+      Serial.print("ERROR: Water detected on the sensor! \nWater value: ");
+      Serial.println(waterValue);
+      delay(100);
+      shutDown(1);
+    }
+  
+    if((DHT.temperature > tempError) || (DHT.humidity > humidityError)) {
+      Serial.print("ERROR: Temperature too hot for the arduino! \nTemperature: ");
+      Serial.print(DHT.temperature);
+      Serial.print(", Humidity: ");
+      Serial.println(DHT.humidity);
+      delay(100);
+      shutDown(1);
+    }
+  
     tcs.getRawData(&r, &g, &b, &c);
     colorTemp = tcs.calculateColorTemperature_dn40(r, g, b, c);
     lux = tcs.calculateLux(r, g, b);
   
     color = getColor(r, g, b);
-  
-    Serial.print("Color Temp: "); Serial.print(colorTemp, DEC); Serial.print(" K - ");
-    Serial.print("Lux: "); Serial.print(lux, DEC); Serial.print(" - ");
-    Serial.print("R: "); Serial.print(r, DEC); Serial.print(" ");
-    Serial.print("G: "); Serial.print(g, DEC); Serial.print(" ");
-    Serial.print("B: "); Serial.print(b, DEC); Serial.print(" ");
-    Serial.print("C: "); Serial.print(c, DEC); Serial.print(" : ");
-    Serial.println(color);
+    printColor(r, g, b); // disable to not show color data
     armThread.check();
     slideThread.check();
 
@@ -175,32 +245,35 @@ void loop() {
       delay(sensorDetectDelay);
       armEnable = true;
       errorCounter = 0;
+      Serial.println("White disk detected!");
     break;
     case 2:
-      delay(sensorDetectDelay);
       slideEnable = true;
+      delay(sensorDetectDelay);
       armEnable = true;
       errorCounter = 0;
+      Serial.println("Black disk detected!");
     break;
     case 3:
-      
+      delay(sensorDetectDelay);
+      Serial.println("Green disk detected!");
+      errorCounter = 0;
     break;
     case -1:
       errorCounter++;
     break;
     }
+
+    if(errorCounter > 1 && errorCounter < 5) {
+      Serial.println("ERROR: Color mismatch with our database.");
+      delay(10);
+    } else if(errorCounter >= 5) {
+      Serial.println("ERROR: Something stuck on the belt, please remove this object! \nRobot is now in standby mode.");
+      delay(7000);
+      Serial.println("Robot starting back up in 3 seconds!");
+      delay(3000);
+    }
   }
   
-  if(errorCounter > 5) {
-    Serial.println("There was an error with the color sensor. \nColor not recognized with the disks...");
-    delay(100);
-    exit(1);
-  }
   
-  
-  if (millis()>60000) { // early exit call for testing purposes
-    arm_motor.run(RELEASE);
-    slide_motor.run(RELEASE);
-    exit(0);
-  }
 }
