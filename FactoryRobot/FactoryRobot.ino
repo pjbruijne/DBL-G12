@@ -90,26 +90,33 @@ void armMove() {
     unsigned long m = millis(); // take time value since start of the program
     if (armStartMillis == (unsigned long) 0) {  // if global start millis value equals zero, the function has just been started
       armStartMillis = m; // set new value of global start millis variable
-      arm_motor.run(FORWARD); // move arm forward
-      //Serial.println("ARM: Pulling!");  // log the movement in serial
-      armDir = 1; // set direction value to 1 (forward)
       return; // stop method for quicker refire
     }
-    else if (m-armStartMillis >= armDelay) {  // if past first checkpoint
-      if (m-armStartMillis >= 2*armDelay) { // if also past second checkpoint
-        //Serial.println("ARM: Finished!");  // log finish in serial
-        arm_motor.run(RELEASE); // stop movement
-        armEnable = false;  // set enable value to zero
-        armStartMillis = (unsigned long) 0; // reset global start millis value
-        return; // stop method
+    else if (m-armStartMillis >= sensorDetectDelay) {
+      if (m-armStartMillis >= armDelay+sensorDetectDelay) {  // if past first checkpoint
+        if (m-armStartMillis >= 2*armDelay+sensorDetectDelay) { // if also past second checkpoint
+          //Serial.println("ARM: Finished!");  // log finish in serial
+          arm_motor.run(RELEASE); // stop movement
+          armEnable = false;  // set enable value to zero
+          armStartMillis = (unsigned long) 0; // reset global start millis value
+          armDir = 0;
+          return; // stop method
+        }
+        else if(armDir == 1) {  // if past first, not past second and direction is still forward
+            arm_motor.run(BACKWARD);  // move backward
+            //Serial.println("ARM: Pushing!");  // log backward movement in serial
+            armDir = -1;  // set direction to -1 (backward)
+            return; // stop method for quicker refire
+        }
       }
-      else if(armDir == 1) {  // if past first, not past second and direction is still forward
-          arm_motor.run(BACKWARD);  // move backward
-          //Serial.println("ARM: Pushing!");  // log backward movement in serial
-          armDir = -1;  // set direction to -1 (backward)
-          return; // stop method for quicker refire
+      else if (armDir == 0) {
+        arm_motor.run(FORWARD); // move arm forward
+        //Serial.println("ARM: Pulling!");  // log the movement in serial
+        armDir = 1; // set direction value to 1 (forward)
+        return; // stop method for quicker refire
       }
     }
+    
   }
 }
 
