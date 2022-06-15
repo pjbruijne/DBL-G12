@@ -4,7 +4,6 @@
 #include "src/DHT/dht.h"
 
 #define WATER_PIN  3
-#define TEMP_PIN 2
 
 #define SIGNAL_WATER_PIN A1
 #define SIGNAL_TEMP_PIN A0
@@ -38,7 +37,7 @@ const int armFreq = 1;              // the wait time in milliseconds before the 
 // slide motor variables
 const int slideSpeed= 255;            // global variable for the rotating speed of the slide motor
 const unsigned long slideDelay = 300; // the time the slide has to move before stopping          
-const unsigned long slideWait = 700;  // the time the slide has to stay in place
+const unsigned long slideWait = 400;  // the time the slide has to stay in place
 unsigned long slideStartMillis = 0;   // the starting time of the slideMove process, 0 means no process
 const int slideFreq = 1;              // the wait time in milliseconds before the TimedAction should try to refire the slideMove method
 
@@ -46,9 +45,9 @@ const int slideFreq = 1;              // the wait time in milliseconds before th
 Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X); // the sensor variable
 int acceptance = 100;// the euclidean distance acceptance variable (distance < acceptance)
 
-int checkInterval = 1100; // interval which the sensor checks in miliseconds
-int sensorDetectDelay = 800; // delay between sensing the disk and moving the arm / slide
+int sensorDetectDelay = 900; // delay between sensing the disk and moving the arm / slide
 int errorCounter = 0;
+int greenCounter = 0;
 
 /**
  * Our method for checking the value of the water sensor
@@ -69,7 +68,6 @@ void shutDown(int code) {
   arm_motor.run(RELEASE);
   slide_motor.run(RELEASE);
   digitalWrite(WATER_PIN, LOW);
-  digitalWrite(TEMP_PIN, LOW);
   exit(code);
 }
 
@@ -93,13 +91,13 @@ void armMove() {
     if (armStartMillis == (unsigned long) 0) {  // if global start millis value equals zero, the function has just been started
       armStartMillis = m; // set new value of global start millis variable
       arm_motor.run(FORWARD); // move arm forward
-      Serial.println("Arm starts pulling!");  // log the movement in serial
+      //Serial.println("ARM: Pulling!");  // log the movement in serial
       armDir = 1; // set direction value to 1 (forward)
       return; // stop method for quicker refire
     }
     else if (m-armStartMillis >= armDelay) {  // if past first checkpoint
       if (m-armStartMillis >= 2*armDelay) { // if also past second checkpoint
-        Serial.println("Arm has finished!");  // log finish in serial
+        //Serial.println("ARM: Finished!");  // log finish in serial
         arm_motor.run(RELEASE); // stop movement
         armEnable = false;  // set enable value to zero
         armStartMillis = (unsigned long) 0; // reset global start millis value
@@ -107,7 +105,7 @@ void armMove() {
       }
       else if(armDir == 1) {  // if past first, not past second and direction is still forward
           arm_motor.run(BACKWARD);  // move backward
-          Serial.println("Arm starts moving back!");  // log backward movement in serial
+          //Serial.println("ARM: Pushing!");  // log backward movement in serial
           armDir = -1;  // set direction to -1 (backward)
           return; // stop method for quicker refire
       }
@@ -127,29 +125,29 @@ void slideMove() {
       slideStartMillis = m; // set new value for start millis
       slide_motor.run(FORWARD);  // make the motor run backward
       slideDir = -1;  // set direction to -1 (backward)
-      Serial.println("Slide moves forward");  // log start in serial
+      //Serial.println("SLIDE: Forward!");  // log start in serial
       return; // stop function for quicker refire
     }
     else if (m-slideStartMillis >= slideDelay) {  // if time is past first checkpoint
       if (m-slideStartMillis >= slideDelay+slideWait) { // if time is past second checkpoint
-        if (millis() - slideStartMillis >= slideDelay*2+slideWait-7) {  //if time is past third checkpoint
+        if (m - slideStartMillis >= slideDelay*2+slideWait-15) {  //if time is past third checkpoint
           slide_motor.run(RELEASE); // stop motor
           slideEnable = false;  // set function execution to false
           slideStartMillis = 0; // reset start millis value
-          Serial.println("Slide has finished"); // log finish in serial
+          //Serial.println("SLIDE: Finished!"); // log finish in serial
           return; // stop the function
         }
         else if (slideDir == 0) {  // if past second checkpoint, not the third yet and not moving
           slide_motor.run(BACKWARD); // run forward
           slideDir = 1; // set direction to 1 (forward)
-          Serial.println("Slide moves back"); // log backward movement in serial
+          //Serial.println("SLIDE: Backwards!"); // log backward movement in serial
           return; // stop function for quicker refire
         }
       }
       else if (slideDir == -1) {  // if past first checkpoint but not yet the second and also moving backward
         slide_motor.run(RELEASE); // stop movement
         slideDir = 0;  // set direction variable to 0
-        Serial.println("Slide stopped");  // log the stop in serial
+        //Serial.println("SLIDE: Waiting...");  // log the stop in serial
         return; // stop function for quicker refire
       }
     }
@@ -165,12 +163,13 @@ TimedAction slideThread = TimedAction(slideFreq,slideMove); // TimedAction of th
  */
 void setup() {
   Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println();Serial.println("Setup!");
+  Serial.println();
+  Serial.println("Setting up the robot!");
 
   if (tcs.begin()) {
-    Serial.println("Found sensor");
+    Serial.println("Found the TCS3472 sensor!");
   } else {
-    Serial.println("The TCS34725 color sensor cannot be found. \nPlease make sure you connected your sensors correctly. \nIf it is all connected, try replacing the wires.");
+    Serial.println("The TCS3472 color sensor cannot be found. \nPlease make sure you connected your sensors correctly. \nIf it is all connected, try replacing the wires.");
     //while (1);
   }
 
@@ -181,11 +180,8 @@ void setup() {
 
   pinMode(WATER_PIN, OUTPUT); // config the pin as output
   digitalWrite(WATER_PIN, LOW);
-
-  pinMode(TEMP_PIN, OUTPUT);
-  digitalWrite(TEMP_PIN, HIGH);
   
-  Serial.println("startup complete!");
+  Serial.println("Robot fully setup!");
   delay(1000);
 }
 
@@ -199,7 +195,7 @@ void loop() {
   armThread.check();  // check if the armThread has to be refired yet
   slideThread.check();  // check if the slideThread has to be refired yet
 
-  if(millis() % checkInterval == 0) {
+  if(millis() % sensorDetectDelay == 0) {
 
     // Temp and Humidity sensor
     DHT.read11(SIGNAL_TEMP_PIN);
@@ -227,7 +223,7 @@ void loop() {
     lux = tcs.calculateLux(r, g, b);
   
     color = getColor(r, g, b);
-    printColor(r, g, b); // disable to not show color data
+    //printColor(r, g, b); // disable to not show color data
     armThread.check();
     slideThread.check();
 
@@ -245,18 +241,20 @@ void loop() {
       delay(sensorDetectDelay);
       armEnable = true;
       errorCounter = 0;
-      Serial.println("White disk detected!");
+      Serial.println("DISK DETECTION: White!");
     break;
     case 2:
       slideEnable = true;
       delay(sensorDetectDelay);
       armEnable = true;
       errorCounter = 0;
-      Serial.println("Black disk detected!");
+      Serial.println("DISK DETECTION: Black!");
     break;
     case 3:
       delay(sensorDetectDelay);
-      Serial.println("Green disk detected!");
+      greenCounter++;
+      Serial.println("DISK DETECTION: Green!");
+      Serial.print("Total of greens: "); Serial.println(greenCounter);
       errorCounter = 0;
     break;
     case -1:
