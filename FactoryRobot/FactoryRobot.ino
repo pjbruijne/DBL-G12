@@ -177,6 +177,7 @@ void setup() {
 
   armEnable = false;
   slideEnable = false;
+  slideOn = false;
   startup();
   tcs.begin();
 
